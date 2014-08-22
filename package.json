@@ -1,0 +1,29 @@
+{
+  "name": "editor-ninja",
+  "version": "0.1.0",
+  "description": "the missing front-end markdown editor for Airpub and everyone else",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/airpub/ninja.git"
+  },
+  "keywords": [
+    "editor",
+    "ninja",
+    "airpub",
+    "wordpress",
+    "markdown",
+    "air",
+    "pub",
+    "publish"
+  ],
+  "author": "turing <o.u.turing@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/airpub/ninja/issues"
+  },
+  "homepage": "https://github.com/airpub/ninja"
+}
