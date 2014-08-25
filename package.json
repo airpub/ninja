@@ -4,7 +4,9 @@
   "description": "the missing front-end markdown editor for Airpub and everyone else",
   "main": "index.js",
   "scripts": {
-    "build": "node_modules/.bin/uglifyjs src/ninja.js --mangle --compress -o dist/ninja.min.js --source-map dist/ninja.min.js.map --source-map-url ninja.min.js.map --source-map-root ../src/ninja.js"
+    "build": "bin/build.sh",
+    "build-setup": "npm run build-codemirror && npm run build",
+    "build-codemirror": "bin/build-codemirror.sh"
   },
   "repository": {
     "type": "git",
