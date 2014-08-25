@@ -1,20 +1,11 @@
-## editor-ninja ![npm](https://badge.fury.io/js/editor-ninja.png)
+## Editor Ninja
 
-the missing front-end markdown editor for Airpub and everyone else
+a hackable Markdown editor.
 
 ### Installation
 ````
-$ [sudo] npm install editor-ninja
+$ bower install ninja --save
 ````
-
-
-### Example
-````javascript
-var editor-ninja = require('editor-ninja');
-````
-
-### API
-check this file: `index.js`
 
 ### Contributing
 - Fork this repo
