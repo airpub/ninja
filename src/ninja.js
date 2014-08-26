@@ -211,7 +211,7 @@
         return toggleText(type)(cm);
       if (type === 'fullscreen')
         return toggleFullScreen(cm);
-      
+
       return toggleBlock(cm, type);
     }
 
@@ -329,38 +329,36 @@
     /**
      * 
      * Toggle full screen of the editor.
-     * @todo [enable after rewriting...]
-     * @status: disabled
+     * Checkout 
+     * https://developer.mozilla.org/en-US/docs/DOM/Using_fullscreen_mode
      * 
      */
     function toggleFullScreen(cm) {
       var el = cm.getWrapperElement();
-
-      // https://developer.mozilla.org/en-US/docs/DOM/Using_fullscreen_mode
       var doc = document;
       var isFull = doc.fullScreen || doc.mozFullScreen || doc.webkitFullScreen;
-      var request = function() {
-        if (el.requestFullScreen) {
-          el.requestFullScreen();
-        } else if (el.mozRequestFullScreen) {
-          el.mozRequestFullScreen();
-        } else if (el.webkitRequestFullScreen) {
-          el.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-        }
-      };
-      var cancel = function() {
-        if (doc.cancelFullScreen) {
-          doc.cancelFullScreen();
-        } else if (doc.mozCancelFullScreen) {
-          doc.mozCancelFullScreen();
-        } else if (doc.webkitCancelFullScreen) {
-          doc.webkitCancelFullScreen();
-        }
-      };
-      if (!isFull) {
+
+      if (!isFull)
         request();
-      } else if (cancel) {
+      else if (cancel)
         cancel();
+
+      function request() {
+        if (el.requestFullScreen)
+          el.requestFullScreen();
+        else if (el.mozRequestFullScreen)
+          el.mozRequestFullScreen();
+        else if (el.webkitRequestFullScreen)
+          el.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
+
+      function cancel() {
+        if (doc.cancelFullScreen)
+          doc.cancelFullScreen();
+        else if (doc.mozCancelFullScreen)
+          doc.mozCancelFullScreen();
+        else if (doc.webkitCancelFullScreen)
+          doc.webkitCancelFullScreen();
       }
     }
 
