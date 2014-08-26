@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>Try Editor Ninja</title>
+  <link rel="stylesheet" href="../bower_components/codemirror/lib/codemirror.css">
+  <script src="../dist/codemirror.min.js"></script>
+  <script src="../src/ninja.js"></script>
 </head>
 <body>
-  
+  <textarea name="editor" id="editor" cols="30" rows="10"></textarea>
+  <script>
+    (new ninja()).render();
+  </script>
 </body>
 </html>

@@ -7,12 +7,12 @@
     "build": "bin/build.sh",
     "build-setup": "npm run build-codemirror && npm run build",
     "build-codemirror": "bin/build-codemirror.sh",
+    "build-docs": "node_modules/.bin/dox",
     "less": "node_modules/.bin/lessc -x src/ninja.less dist/ninja.min.css",
     "serve": "node_modules/.bin/serve --no-less .",
     "watch-js": "node_modules/.bin/rewatch src/*.js -c 'npm run build'",
     "watch-less": "node_modules/.bin/rewatch src/*.less -c 'npm run less'",
-    "watch": "npm run watch-js & npm run watch-less",
-    "dev": "npm run serve && npm run watch",
+    "dev": "npm run serve & npm run watch-js"
   },
   "repository": {
     "type": "git",
@@ -38,6 +38,7 @@
     "serve": "~1.4.0",
     "uglify-js": "^2.4.15",
     "rewatch": "~0.2.2",
-    "less": "~1.7.3"
+    "less": "~1.7.3",
+    "dox": "^0.4.6"
   }
 }
