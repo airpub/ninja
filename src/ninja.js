@@ -252,13 +252,13 @@
   *
   **/
   Ninja.prototype.toggle = function(type) {
-    return toggle(type)(this);
+    return toggle(type)(this.codemirror);
   }
   Ninja.prototype.draw = function(type) {
-    return draw(type)(this);
+    return draw(type)(this.codemirror);
   };
   Ninja.prototype.trigger = function(type) {
-    return trigger(type)(this);
+    return trigger(type)(this.codemirror);
   };
 
   /*======================================
@@ -282,10 +282,9 @@
   function toggle(type) {
     var toggleTextList = ['bold', 'italic'];
 
-    function toggleWhatever(editor) {
-      var cm = editor.codemirror;
+    function toggleWhatever(cm) {
       if (!cm) 
-        return false;
+        return;
       if (toggleTextList.indexOf(type) > -1)
         return toggleText(type)(cm);
       if (type === 'fullscreen')
@@ -499,8 +498,7 @@
       image: ['![', '](http://)']
     };
 
-    function drawWhatever(editor) {
-      var cm = editor.codemirror;
+    function drawWhatever(cm) {
       var stat = getState(cm);
       replaceSelection(cm, stat[type], typeMap[type][0], typeMap[type][1])
     }
@@ -519,8 +517,7 @@
   function trigger(type) {
     return triggerBuiltinMethod;
 
-    function triggerBuiltinMethod(editor) {
-      var cm = editor.codemirror;
+    function triggerBuiltinMethod(cm) {
       if (!cm[type]) return;
       cm[type]();
       cm.focus();
