@@ -114,9 +114,9 @@
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
 
-    if (this.options.toolbar !== false) 
+    if (this.options && this.options.toolbar !== false) 
       this.createToolbar();
-    if (this.options.statusbar !== false) 
+    if (this.options && this.options.statusbar !== false) 
       this.createStatusbar();
 
     this._rendered = ele;
@@ -128,7 +128,7 @@
   * Create a toolbar on bottom of the editor
   *
   **/
-  Editor.prototype.createToolbar = function(items) {
+  Ninja.prototype.createToolbar = function(items) {
     items = items || this.toolbar;
 
     if (!items || items.length === 0)
@@ -195,7 +195,7 @@
   * Create a statusbar on bottom of the editor
   *
   **/  
-  Editor.prototype.createStatusbar = function createStatusbar(status) {
+  Ninja.prototype.createStatusbar = function createStatusbar(status) {
     status = status || this.statusbar;
 
     if (!status || status.length === 0) return;
@@ -251,13 +251,13 @@
   *   (new Editor()).draw('image');
   *
   **/
-  Editor.prototype.toggle = function(type) {
+  Ninja.prototype.toggle = function(type) {
     return toggle(type)(this);
   }
-  Editor.prototype.draw = function(type) {
+  Ninja.prototype.draw = function(type) {
     return draw(type)(this);
   };
-  Editor.prototype.trigger = function(type) {
+  Ninja.prototype.trigger = function(type) {
     return trigger(type)(this);
   };
 
@@ -280,10 +280,8 @@
   *
   **/
   function toggle(type) {
-    return toggleWhatever;
-
     var toggleTextList = ['bold', 'italic'];
-    
+
     function toggleWhatever(editor) {
       var cm = editor.codemirror;
       if (!cm) 
@@ -350,8 +348,6 @@
     *
     **/
     function toggleText(type) {
-      return toggleTextByStyle;
-
       var styleMap = {
         bold: {
           start: '**',
@@ -405,6 +401,8 @@
         cm.setSelection(startPoint, endPoint);
         cm.focus();
       }
+
+      return toggleTextByStyle;
     }
 
     /**
@@ -480,6 +478,8 @@
       var text = cm.getValue();
       preview.innerHTML = parse(text);
     }
+
+    return toggleWhatever;
   }
 
   /**
@@ -525,6 +525,39 @@
       cm[type]();
       cm.focus();
     }
+  }
+
+  /**
+   * 
+   * The state of CodeMirror at the given position.
+   *
+   */
+  function getState(cm, pos) {
+    pos = pos || cm.getCursor('start');
+    var stat = cm.getTokenAt(pos);
+    if (!stat.type) return {};
+
+    var types = stat.type.split(' ');
+
+    var ret = {}, data, text;
+    for (var i = 0; i < types.length; i++) {
+      data = types[i];
+      if (data === 'strong') {
+        ret.bold = true;
+      } else if (data === 'variable-2') {
+        text = cm.getLine(pos.line);
+        if (/^\s*\d+\.\s/.test(text)) {
+          ret['ordered-list'] = true;
+        } else {
+          ret['unordered-list'] = true;
+        }
+      } else if (data === 'atom') {
+        ret.quote = true;
+      } else if (data === 'em') {
+        ret.italic = true;
+      }
+    }
+    return ret;
   }
 
   /**
@@ -605,6 +638,8 @@
           obj[format(key)] = obj[key];
         })(key);
       }
+      return obj;
+
       function format(name) {
         if (isMac)
           name = name.replace('Ctrl', 'Cmd');
