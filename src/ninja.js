@@ -75,10 +75,10 @@
   * Add toolbar button
   *
   * @example
-  *   (new Ninja()).addTool('customTool', function(){ console.log('new tool!') })
+  *   (new Ninja()).tool('customTool', function(){ console.log('new tool!') })
   *
   **/
-  Ninja.prototype.addTool = function addTool(name, action) {
+  Ninja.prototype.tool = function tool(name, action) {
     if (!this.toolbar)
       this.toolbar = [];
     if (name && action)
@@ -97,10 +97,10 @@
   Ninja.prototype.render = function render() {
     var ele = this.element || document.getElementsByTagName('textarea')[0];
 
-    if (this.codemirror) 
-      delete this.codemirror;
     if (!ele) 
       throw new Error('ninja.render(); ninja requires a vaild element to render');
+    if (this._rendered && this._rendered === ele) 
+      return;
 
     var codeMirrorOptions = {};
     codeMirrorOptions.mode = 'markdown';
@@ -114,17 +114,89 @@
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
 
+    if (this.options.toolbar !== false) 
+      this.createToolbar();
+    if (this.options.statusbar !== false) 
+      this.createStatusbar();
+
+    this._rendered = ele;
     return this;
   };
 
   /**
   *
-  * Create a status bar on bottom of the editor
-  * @todo [custom status bar prefix]
+  * Create a toolbar on bottom of the editor
+  *
+  **/
+  Editor.prototype.createToolbar = function(items) {
+    items = items || this.toolbar;
+
+    if (!items || items.length === 0)
+      return;
+
+    var bar = document.createElement('div');
+    bar.className = 'editor-toolbar';
+
+    var self = this;
+
+    var el;
+    self.toolbar = {};
+
+    for (var i = 0; i < items.length; i++) {
+      (function(item) {
+        var el;
+        if (item.name) {
+          el = createIcon(item.name, item);
+        } else if (item === '|') {
+          el = createSep();
+        } else {
+          el = createIcon(item);
+        }
+
+        // bind events, special for info
+        if (item.action) {
+          if (typeof item.action === 'function') {
+            el.onclick = function(e) {
+              item.action(self);
+            };
+          } else if (typeof item.action === 'string') {
+            el.href = item.action;
+            el.target = '_blank';
+          }
+        }
+        self.toolbar[item.name || item] = el;
+        bar.appendChild(el);
+      })(items[i]);
+    }
+
+    var cm = this.codemirror;
+    cm.on('cursorActivity', function() {
+      var stat = getState(cm);
+
+      for (var key in self.toolbar) {
+        (function(key) {
+          var el = self.toolbar[key];
+          if (stat[key]) {
+            el.className += ' active';
+          } else {
+            el.className = el.className.replace(/\s*active\s*/g, '');
+          }
+        })(key);
+      }
+    });
+
+    var cmWrapper = cm.getWrapperElement();
+    cmWrapper.parentNode.insertBefore(bar, cmWrapper);
+    return bar;
+  };
+
+  /**
+  *
+  * Create a statusbar on bottom of the editor
   *
   **/  
   Editor.prototype.createStatusbar = function createStatusbar(status) {
-    status = status || this.options.status;
+    status = status || this.statusbar;
 
     if (!status || status.length === 0) return;
 
@@ -133,26 +205,35 @@
 
     var pos, cm = this.codemirror;
     for (var i = 0; i < status.length; i++) {
-      (function(name) {
+      (function(statusButton) {
         var el = document.createElement('span');
-        el.className = name;
-        if (name === 'words') {
+        el.className = statusButton.name;
+        // append text if provided.
+        if (statusButton.text) {
+          var text = document.createElement('span');
+          text.className = 'statusbar-text';
+          text.innerHTML = statusButton.text;
+        }
+        if (statusButton.name === 'words') {
           el.innerHTML = '0';
           cm.on('update', function() {
             el.innerHTML = wordCount(cm.getValue());
           });
-        } else if (name === 'lines') {
+        } else if (statusButton.name === 'lines') {
           el.innerHTML = '0';
           cm.on('update', function() {
             el.innerHTML = cm.lineCount();
           });
-        } else if (name === 'cursor') {
+        } else if (statusButton.name === 'cursor') {
           el.innerHTML = '0:0';
           cm.on('cursorActivity', function() {
             pos = cm.getCursor();
             el.innerHTML = pos.line + ':' + pos.ch;
           });
         }
+        // append text before real stats
+        if (statusButton.text)
+          bar.appendChild(text);
         bar.appendChild(el);
       })(status[i]);
     }
