@@ -4,7 +4,9 @@
   if (!codeMirror) 
     throw new Error('Ninja.init(); CodeMirror is required.');
 
-  // bootstrap main function
+  /*===============================================
+  =            Bootstrap main function            =
+  ===============================================*/ 
   (function(fn) {
     if (typeof exports == "object" && typeof module == "object") // CommonJS
       module.exports = fn;
@@ -19,7 +21,9 @@
       window.ninja = fn;
   })(Ninja);
 
-  // Editor Ninja
+  /*====================================
+  =            Editor Ninja            =
+  ====================================*/
   function Ninja(el, options) {
     if (!el && !options)
       return this;
@@ -29,23 +33,51 @@
       return this.render();
   }
 
-  // Set a key-value pair to instance
+  /*==================================================
+  =            Editor Prototype functions            =
+  ==================================================*/  
+
+  /**
+  *
+  * Set a key-value pair to instance
+  * 
+  * @example
+  *   (new Ninja()).set('element', document.getElementById('my-ele'))
+  *
+  **/
   Ninja.prototype.set = function set(key, value) {
     if (key && value)
       this[key] = value;
     return this;
   };
 
-  // Set a key-value pair to instance.keyMap
-  Ninja.prototype.setKey = function setKey(key, value) {
+  /**
+  *
+  * Set/Get a key-value pair to instance.keyMap
+  *
+  * @example
+  *   GET: (new Ninja()).shortcut('bold');
+  *   SET: (new Ninja()).shortcut('bold', 'Cmd-Alt-B');
+  *
+  **/
+  Ninja.prototype.shortcut = function shortcut(key, value) {
     if (!this.keyMaps)
       this.keyMaps = {};
+    if (key && !value)
+      return this.keyMaps[key];
     if (key && value)
       this.keyMaps[key] = value;
     return this;
   };
 
-  // Add toolbar button
+  /**
+  *
+  * Add toolbar button
+  *
+  * @example
+  *   (new Ninja()).addTool('customTool', function(){ console.log('new tool!') })
+  *
+  **/
   Ninja.prototype.addTool = function addTool(name, action) {
     if (!this.toolbar)
       this.toolbar = [];
@@ -54,7 +86,14 @@
     return this;
   };
 
-  // Render real editor
+  /**
+  *
+  * Renderer of Ninja editor
+  *
+  * @example
+  *   (new Ninja()).render();
+  *
+  **/
   Ninja.prototype.render = function render() {
     var ele = this.element || document.getElementsByTagName('textarea')[0];
 
@@ -74,11 +113,17 @@
       codeMirrorOptions.value = element.value;
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
+
+    return this;
   };
 
-  // Create a status bar on bottom of the editor
-  // TODO: custom status bar prefix
-  Editor.prototype.createStatusbar = function(status) {
+  /**
+  *
+  * Create a status bar on bottom of the editor
+  * @todo [custom status bar prefix]
+  *
+  **/  
+  Editor.prototype.createStatusbar = function createStatusbar(status) {
     status = status || this.options.status;
 
     if (!status || status.length === 0) return;
@@ -115,34 +160,25 @@
     cmWrapper.parentNode.insertBefore(bar, cmWrapper.nextSibling);
     return bar;
   };
-
-  // Editor's prototype functions
+  
+  /**
+  *
+  * Inject editor's utils to editor instance
+  *
+  * @example
+  *   (new Editor()).toggle('bold');
+  *   (new Editor()).draw('image');
+  *
+  **/
   Editor.prototype.toggle = function(type) {
-    return toggle(type, this);
+    return toggle(type)(this);
   }
-  Editor.prototype.toggleBold = function() {
-    toggleBold(this);
+  Editor.prototype.draw = function(type) {
+    return draw(type)(this);
   };
-  Editor.prototype.toggleItalic = function() {
-    toggleItalic(this);
+  Editor.prototype.trigger = function(type) {
+    return trigger(type)(this);
   };
-  Editor.prototype.drawLink = function() {
-    drawLink(this);
-  };
-  Editor.prototype.drawImage = function() {
-    drawImage(this);
-  };
-  Editor.prototype.undo = function() {
-    undo(this);
-  };
-  Editor.prototype.redo = function() {
-    redo(this);
-  };
-  Editor.prototype.toggleFullScreen = function() {
-    toggleFullScreen(this);
-  };
-  Editor.prototype.replaceSelection = replaceSelection;
-  Editor.prototype.getState = getState;
 
   /*======================================
   =            Editor's Utils            =
@@ -151,25 +187,24 @@
   /**
   *
   * Toggle Whatever you like
-  * 
+  *
+  * @status: enabled
   * @example
   *   toggle('bold');
   *   toggle('italic');
   *   toggle('quote');
   *   toggle('unordered-list');
   *   toggle('ordered-list');
+  *   toggle('fullscreen');
   *
   **/
-  function toggle(type, self) {
+  function toggle(type) {
     return toggleWhatever;
 
     var toggleTextList = ['bold', 'italic'];
     
     function toggleWhatever(editor) {
-      // bootstrap to codemirror instance.
-      var cm = self && self.codemirror ? 
-               self.codemirror : 
-               editor.codemirror;
+      var cm = editor.codemirror;
       if (!cm) 
         return false;
       if (toggleTextList.indexOf(type) > -1)
@@ -182,6 +217,7 @@
     *
     * Toggle a line to selected block style
     *
+    * @status: enabled
     * @example
     *   toggle('quote');
     *   toggle('ordered-list');
@@ -223,7 +259,8 @@
     /**
     *
     * Toggle a wrappered text to seleced style.
-    * 
+    *
+    * @status: enabled
     * @example
     *   toggleText('bold') => fn(cm);
     *   toggleText('italic') => fn(cm);
@@ -290,8 +327,9 @@
     /**
     *
     * Toggle a preview mode
-    * @status: [disabled]
+    * 
     * @todo [enable after rewriting...]
+    * @status: disabled
     * @example
     *   togglePreview(editor);
     *
@@ -370,6 +408,14 @@
     }
   }
 
+  /**
+  *
+  * Replace current wrapped text in given string
+  * 
+  * @param {[String]} [start] [the start of given string]
+  * @param {[String]} [end] [the end of given string]
+  *
+  **/
   function replaceSelection(cm, active, start, end) {
     var text;
     var startPoint = cm.getCursor('start');
@@ -390,18 +436,25 @@
     cm.focus();
   }
 
-  /*-----  End of Editor's Utils  ------*/
-
-  // Init default keymaps
+  /*=============================================
+  =            Init functions                   =
+  =============================================*/  
+  
+  /**
+  *
+  * Init shortcut keyMap, if customKeyMap provided,
+  * merge customKeyMap to default KeyMap.
+  *
+  **/
   function initKeyMaps(customKeyMaps) {
     var defaultKeyMaps = {
-      'Cmd-B': toggleBold,
-      'Cmd-I': toggleItalic,
-      'Cmd-K': drawLink,
-      'Cmd-Alt-I': drawImage,
-      "Cmd-'": toggle('quote', editor),
-      'Cmd-Alt-L': toggleOrderedList,
-      'Cmd-L': toggle('unordered-list', editor),
+      'Cmd-K': draw('link'),
+      'Cmd-Alt-I': draw('image'),
+      'Cmd-B': toggle('bold'),
+      'Cmd-I': toggle('italic'),
+      "Cmd-'": toggle('quote'),
+      'Cmd-L': toggle('unordered-list'),
+      'Cmd-Alt-L': toggle('ordered-list'),
       'Enter': 'newlineAndIndentContinueMarkdownList'
     };
     return formatKeyObject(customKeyMaps || defaultKeyMaps);
@@ -423,25 +476,34 @@
     }
   }
 
-  // Init default Toolbar
+  /**
+  *
+  * Init default Toolbar
+  *
+  * @param {[Obejct]} [customToolbar]
+  *
+  **/
   function initToolbar(customToolbar) {
     var defaultToolbar = [
-      {name: 'bold', action: toggleBold},
-      {name: 'italic', action: toggleItalic},
+      {name: 'bold', action: toggle('bold')},
+      {name: 'italic', action: toggle('italic')},
       '|',
       {name: 'quote', action: toggle('quote')},
       {name: 'unordered-list', action: toggle('unordered-list')},
       {name: 'ordered-list', action: toggle('ordered-list')},
       '|',
-      {name: 'link', action: drawLink},
-      {name: 'image', action: drawImage},
-      {name: 'uploadImage', action: uploadImage},
+      {name: 'link', action: draw('link')},
+      {name: 'image', action: draw('image')},
+      {name: 'uploadImage', action: draw('upload-image')},
       '|',
-      {name: 'preview', action: togglePreview},
-      {name: 'fullscreen', action: toggleFullScreen}
+      {name: 'fullscreen', action: toggle('fullscreen')}
     ];
     return customToolbar || defaultToolbar;
   }
+
+  /*=============================================
+  =               Directives                    =
+  =============================================*/  
 
   function ninjaDirective($upyun, $timeout) {
     var directive = {
@@ -556,7 +618,4 @@
       }
     }
   }
-})(
-  window.CodeMirror,
-  window.angular
-);
+})(window.CodeMirror,window.angular);
