@@ -1,7 +1,8 @@
 (function(codeMirror, angular) {
   'use strict';
 
-  if (!codeMirror) throw new Error('codeMirror is required.');
+  if (!codeMirror) 
+    throw new Error('Ninja.init(); CodeMirror is required.');
 
   // bootstrap main function
   (function(fn) {
@@ -11,13 +12,14 @@
       return define([], fn);
     else if (angular) // Angular.js
       angular
-      .module('ninja', ['upyun'])
-      .service('ninja', ninja)
-      .directive('ninja', ['$upyun', '$timeout', ninjaDirective]);
+        .module('ninja', ['upyun'])
+        .service('ninja', ninja)
+        .directive('ninja', ['$upyun', '$timeout', ninjaDirective]);
     else
       window.ninja = fn;
   })(Ninja);
 
+  // Editor Ninja
   function Ninja(el, options) {
     if (!el && !options)
       return this;
@@ -74,167 +76,298 @@
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
   };
 
-  // Editor's prototype functions
-  Ninja.prototype.replaceSelection = replaceSelection;
-  Ninja.prototype.drawLink = drawLink;
-  Ninja.prototype.toggleBold = toggleBold;
-  Ninja.prototype.toggleItalic = toggleItalic;
+  // Create a status bar on bottom of the editor
+  // TODO: custom status bar prefix
+  Editor.prototype.createStatusbar = function(status) {
+    status = status || this.options.status;
 
-  function toggleBlockquote(editor) {
-    var cm = editor.codemirror;
-    _toggleLine(cm, 'quote');
-  }
+    if (!status || status.length === 0) return;
 
-  function toggleUnOrderedList(editor) {
-    var cm = editor.codemirror;
-    _toggleLine(cm, 'unordered-list');
-  }
+    var bar = document.createElement('div');
+    bar.className = 'editor-statusbar';
 
-  function toggleOrderedList(editor) {
-    var cm = editor.codemirror;
-    _toggleLine(cm, 'ordered-list');
-  }
-
-  function drawLink(editor) {
-    var cm = editor.codemirror;
-    var stat = getState(cm);
-    replaceSelection(cm, stat.link, '[', '](http://)');
-  }
-
-  function drawImage(editor) {
-    var cm = editor.codemirror;
-    var stat = getState(cm);
-    replaceSelection(cm, stat.image, '![', '](http://)');
-  }
-
-  function undo(editor) {
-    var cm = editor.codemirror;
-    cm.undo();
-    cm.focus();
-  }
-
-  function redo(editor) {
-    var cm = editor.codemirror;
-    cm.redo();
-    cm.focus();
-  }
-
-  function toggleLine(cm, name) {
-    var stat = getState(cm);
-    var startPoint = cm.getCursor('start');
-    var endPoint = cm.getCursor('end');
-    var repl = {
-      quote: /^(\s*)\>\s+/,
-      'unordered-list': /^(\s*)(\*|\-|\+)\s+/,
-      'ordered-list': /^(\s*)\d+\.\s+/
-    };
-    var map = {
-      quote: '> ',
-      'unordered-list': '* ',
-      'ordered-list': '1. '
-    };
-    for (var i = startPoint.line; i <= endPoint.line; i++) {
-      (function(i) {
-        var text = cm.getLine(i);
-        if (stat[name]) {
-          text = text.replace(repl[name], '$1');
-        } else {
-          text = map[name] + text;
+    var pos, cm = this.codemirror;
+    for (var i = 0; i < status.length; i++) {
+      (function(name) {
+        var el = document.createElement('span');
+        el.className = name;
+        if (name === 'words') {
+          el.innerHTML = '0';
+          cm.on('update', function() {
+            el.innerHTML = wordCount(cm.getValue());
+          });
+        } else if (name === 'lines') {
+          el.innerHTML = '0';
+          cm.on('update', function() {
+            el.innerHTML = cm.lineCount();
+          });
+        } else if (name === 'cursor') {
+          el.innerHTML = '0:0';
+          cm.on('cursorActivity', function() {
+            pos = cm.getCursor();
+            el.innerHTML = pos.line + ':' + pos.ch;
+          });
         }
-        cm.setLine(i, text);
-      })(i);
+        bar.appendChild(el);
+      })(status[i]);
     }
-    cm.focus();
-  }
-
-  function toggleBold() {
-    var cm = this.codemirror;
-    var stat = getState(cm);
-
-    var text;
-    var start = '**';
-    var end = '**';
-
-    var startPoint = cm.getCursor('start');
-    var endPoint = cm.getCursor('end');
-    if (stat.bold) {
-      text = cm.getLine(startPoint.line);
-      start = text.slice(0, startPoint.ch);
-      end = text.slice(startPoint.ch);
-
-      start = start.replace(/^(.*)?(\*|\_){2}(\S+.*)?$/, '$1$3');
-      end = end.replace(/^(.*\S+)?(\*|\_){2}(\s+.*)?$/, '$1$3');
-      startPoint.ch -= 2;
-      endPoint.ch -= 2;
-      cm.setLine(startPoint.line, start + end);
-    } else {
-      text = cm.getSelection();
-      cm.replaceSelection(start + text + end);
-
-      startPoint.ch += 2;
-      endPoint.ch += 2;
-    }
-    cm.setSelection(startPoint, endPoint);
-    cm.focus();
+    var cmWrapper = this.codemirror.getWrapperElement();
+    cmWrapper.parentNode.insertBefore(bar, cmWrapper.nextSibling);
+    return bar;
   };
 
-  function toggleItalic() {
-    var cm = this.codemirror;
-    var stat = getState(cm);
+  // Editor's prototype functions
+  Editor.prototype.toggle = function(type) {
+    return toggle(type, this);
+  }
+  Editor.prototype.toggleBold = function() {
+    toggleBold(this);
+  };
+  Editor.prototype.toggleItalic = function() {
+    toggleItalic(this);
+  };
+  Editor.prototype.drawLink = function() {
+    drawLink(this);
+  };
+  Editor.prototype.drawImage = function() {
+    drawImage(this);
+  };
+  Editor.prototype.undo = function() {
+    undo(this);
+  };
+  Editor.prototype.redo = function() {
+    redo(this);
+  };
+  Editor.prototype.toggleFullScreen = function() {
+    toggleFullScreen(this);
+  };
+  Editor.prototype.replaceSelection = replaceSelection;
+  Editor.prototype.getState = getState;
 
-    var text;
-    var start = '*';
-    var end = '*';
+  /*======================================
+  =            Editor's Utils            =
+  ======================================*/
+  
+  /**
+  *
+  * Toggle Whatever you like
+  * 
+  * @example
+  *   toggle('bold');
+  *   toggle('italic');
+  *   toggle('quote');
+  *   toggle('unordered-list');
+  *   toggle('ordered-list');
+  *
+  **/
+  function toggle(type, self) {
+    return toggleWhatever;
 
-    var startPoint = cm.getCursor('start');
-    var endPoint = cm.getCursor('end');
-    if (stat.italic) {
-      text = cm.getLine(startPoint.line);
-      start = text.slice(0, startPoint.ch);
-      end = text.slice(startPoint.ch);
+    var toggleTextList = ['bold', 'italic'];
+    
+    function toggleWhatever(editor) {
+      // bootstrap to codemirror instance.
+      var cm = self && self.codemirror ? 
+               self.codemirror : 
+               editor.codemirror;
+      if (!cm) 
+        return false;
+      if (toggleTextList.indexOf(type) > -1)
+        return toggleText(type)(cm);
 
-      start = start.replace(/^(.*)?(\*|\_)(\S+.*)?$/, '$1$3');
-      end = end.replace(/^(.*\S+)?(\*|\_)(\s+.*)?$/, '$1$3');
-      startPoint.ch -= 1;
-      endPoint.ch -= 1;
-      cm.setLine(startPoint.line, start + end);
-    } else {
-      text = cm.getSelection();
-      cm.replaceSelection(start + text + end);
-
-      startPoint.ch += 1;
-      endPoint.ch += 1;
+      return toggleBlock(cm, type);
     }
-    cm.setSelection(startPoint, endPoint);
-    cm.focus();
+
+    /**
+    *
+    * Toggle a line to selected block style
+    *
+    * @example
+    *   toggle('quote');
+    *   toggle('ordered-list');
+    *   toggle('unordered-list');
+    *
+    **/
+    function toggleBlock(type, cm) {
+      var stat = getState(cm);
+      var startPoint = cm.getCursor('start');
+      var endPoint = cm.getCursor('end');
+      var styleMap = {
+        quote: {
+          re: /^(\s*)\>\s+/,
+          prepend: '> '
+        },
+        'unordered-list': {
+          re: /^(\s*)(\*|\-|\+)\s+/,
+          prepend: '* '
+        },
+        'ordered-list': {
+          re: /^(\s*)\d+\.\s+/,
+          prepend: '1. '
+        }
+      };
+      var style = styleMap[type];
+      for (var i = startPoint.line; i <= endPoint.line; i++) {
+        (function(i) {
+          var text = cm.getLine(i);
+          if (stat[type])
+            text = text.replace(style.re[type], '$1');
+          else
+            text = style.prepend[type] + text;
+          cm.setLine(i, text);
+        })(i);
+      }
+      cm.focus();
+    }
+
+    /**
+    *
+    * Toggle a wrappered text to seleced style.
+    * 
+    * @example
+    *   toggleText('bold') => fn(cm);
+    *   toggleText('italic') => fn(cm);
+    *
+    **/
+    function toggleText(type) {
+      return toggleTextByStyle;
+
+      var styleMap = {
+        bold: {
+          start: '**',
+          end: '**',
+          re: {
+            start: /^(.*)?(\*|\_){2}(\S+.*)?$/,
+            end: /^(.*\S+)?(\*|\_){2}(\s+.*)?$/
+          },
+          offset: 2
+        },
+        italic: {
+          start: '*',
+          end: '*',
+          re: {
+            start: /^(.*)?(\*|\_)(\S+.*)?$/,
+            end: /^(.*\S+)?(\*|\_)(\s+.*)?$/
+          },
+          offset: 1
+        }
+      };
+
+      function toggleTextByStyle(cm) {
+        var style = styleMap[type];
+        var stat = getState(cm);
+        var text;
+
+        var start = style.start;
+        var end = style.end;
+
+        var startPoint = cm.getCursor('start');
+        var endPoint = cm.getCursor('end');
+
+        if (stat[type]) {
+          text = cm.getLine(startPoint.line);
+          start = text.slice(0, startPoint.ch);
+          end = text.slice(startPoint.ch);
+
+          start = start.replace(style.re.start, '$1$3');
+          end = end.replace(style.re.end, '$1$3');
+
+          startPoint.ch -= style.offset;
+          endPoint.ch -= style.offset;
+          cm.setLine(startPoint.line, start + end);
+        } else {
+          text = cm.getSelection();
+          cm.replaceSelection(start + text + end);
+
+          startPoint.ch += style.offset;
+          endPoint.ch += style.offset;
+        }
+        cm.setSelection(startPoint, endPoint);
+        cm.focus();
+      }
+    }
+
+    /**
+    *
+    * Toggle a preview mode
+    * @status: [disabled]
+    * @todo [enable after rewriting...]
+    * @example
+    *   togglePreview(editor);
+    *
+    **/
+    function togglePreview(editor) {
+      var toolbar = editor.toolbar.preview;
+      var parse = editor.constructor.markdown;
+      var cm = editor.codemirror;
+      var wrapper = cm.getWrapperElement();
+      var preview = wrapper.lastChild;
+      if (!/editor-preview/.test(preview.className)) {
+        preview = document.createElement('div');
+        preview.className = 'editor-preview';
+        wrapper.appendChild(preview);
+      }
+      if (/editor-preview-active/.test(preview.className)) {
+        preview.className = preview.className.replace(
+          /\s*editor-preview-active\s*/g, ''
+        );
+        toolbar.className = toolbar.className.replace(/\s*active\s*/g, '');
+      } else {
+        /* When the preview button is clicked for the first time,
+         * give some time for the transition from editor.css to fire and the view to slide from right to left,
+         * instead of just appearing.
+         */
+        setTimeout(function() {preview.className += ' editor-preview-active'}, 1);
+        toolbar.className += ' active';
+      }
+      var text = cm.getValue();
+      preview.innerHTML = parse(text);
+    }
   }
 
-  function togglePreview(editor) {
-    var toolbar = editor.toolbar.preview;
-    var parse = editor.constructor.markdown;
-    var cm = editor.codemirror;
-    var wrapper = cm.getWrapperElement();
-    var preview = wrapper.lastChild;
-    if (!/editor-preview/.test(preview.className)) {
-      preview = document.createElement('div');
-      preview.className = 'editor-preview';
-      wrapper.appendChild(preview);
+  /**
+  *
+  * Draw something, and wrap current cursor inside.
+  *
+  * @example
+  *   draw('link'); => [<cursor>](http://)
+  *   draw('image'); => ![<cursor>](http://)
+  *
+  **/
+  function draw(type) {
+    return drawWhatever;
+
+    var typeMap = {
+      link: ['[', '](http://)'],
+      image: ['![', '](http://)']
+    };
+
+    function drawWhatever(editor) {
+      var cm = editor.codemirror;
+      var stat = getState(cm);
+      replaceSelection(cm, stat[type], typeMap[type][0], typeMap[type][1])
     }
-    if (/editor-preview-active/.test(preview.className)) {
-      preview.className = preview.className.replace(
-        /\s*editor-preview-active\s*/g, ''
-      );
-      toolbar.className = toolbar.className.replace(/\s*active\s*/g, '');
-    } else {
-      /* When the preview button is clicked for the first time,
-       * give some time for the transition from editor.css to fire and the view to slide from right to left,
-       * instead of just appearing.
-       */
-      setTimeout(function() {preview.className += ' editor-preview-active'}, 1);
-      toolbar.className += ' active';
+  }
+
+  /**
+  *
+  * Trigger built-in method of CodeMirror
+  * And focus on the right cursor later.
+  * 
+  * @example
+  *   trigger('undo') => editor.codemirror.undo();
+  *   trigger('redo') => editor.codemirror.redo();
+  *
+  **/
+  function trigger(type) {
+    return triggerBuiltinMethod;
+
+    function triggerBuiltinMethod(editor) {
+      var cm = editor.codemirror;
+      if (!cm[type]) return;
+      cm[type]();
+      cm.focus();
     }
-    var text = cm.getValue();
-    preview.innerHTML = parse(text);
   }
 
   function replaceSelection(cm, active, start, end) {
@@ -257,10 +390,7 @@
     cm.focus();
   }
 
-  // Check if a object is vaild tool object.
-  function isTool(obj) {
-    return obj && typeof(obj) === 'object' && obj.hasOwnProperty('name') && obj.hasOwnProperty('action');
-  }
+  /*-----  End of Editor's Utils  ------*/
 
   // Init default keymaps
   function initKeyMaps(customKeyMaps) {
@@ -269,12 +399,28 @@
       'Cmd-I': toggleItalic,
       'Cmd-K': drawLink,
       'Cmd-Alt-I': drawImage,
-      "Cmd-'": toggleBlockquote,
+      "Cmd-'": toggle('quote', editor),
       'Cmd-Alt-L': toggleOrderedList,
-      'Cmd-L': toggleUnOrderedList,
+      'Cmd-L': toggle('unordered-list', editor),
       'Enter': 'newlineAndIndentContinueMarkdownList'
     };
-    return customKeyMaps || defaultKeyMaps;
+    return formatKeyObject(customKeyMaps || defaultKeyMaps);
+
+    function formatKeyObject(obj) {
+      var isMac = /Mac/.test(navigator.platform);
+      for (var key in obj) {
+        (function(key) {
+          obj[format(key)] = obj[key];
+        })(key);
+      }
+      function format(name) {
+        if (isMac)
+          name = name.replace('Ctrl', 'Cmd');
+        else
+          name = name.replace('Cmd', 'Ctrl');
+        return name;
+      }
+    }
   }
 
   // Init default Toolbar
@@ -283,9 +429,9 @@
       {name: 'bold', action: toggleBold},
       {name: 'italic', action: toggleItalic},
       '|',
-      {name: 'quote', action: toggleBlockquote},
-      {name: 'unordered-list', action: toggleUnOrderedList},
-      {name: 'ordered-list', action: toggleOrderedList},
+      {name: 'quote', action: toggle('quote')},
+      {name: 'unordered-list', action: toggle('unordered-list')},
+      {name: 'ordered-list', action: toggle('ordered-list')},
       '|',
       {name: 'link', action: drawLink},
       {name: 'image', action: drawImage},

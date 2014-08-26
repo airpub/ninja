@@ -7,7 +7,7 @@
     "build": "bin/build.sh",
     "build-setup": "npm run build-codemirror && npm run build",
     "build-codemirror": "bin/build-codemirror.sh",
-    "build-docs": "node_modules/.bin/dox",
+    "build-docs": "node_modules/.bin/jsdoc src/ninja.js --destination docs",
     "less": "node_modules/.bin/lessc -x src/ninja.less dist/ninja.min.css",
     "serve": "node_modules/.bin/serve --no-less .",
     "watch-js": "node_modules/.bin/rewatch src/*.js -c 'npm run build'",
@@ -39,6 +39,6 @@
     "uglify-js": "^2.4.15",
     "rewatch": "~0.2.2",
     "less": "~1.7.3",
-    "dox": "^0.4.6"
+    "jsdoc": "^3.3.0-alpha9"
   }
 }
