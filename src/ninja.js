@@ -84,10 +84,14 @@
   Ninja.prototype.tool = function tool(name, metaString) {
     if (!name || typeof(name) !== 'string')
       return;
+
     if (!this.toolbar)
       this.toolbar = [];
-    if (name === '|')
+
+    if (arguments.length === 1) {
       this.toolbar.push(name);
+      return this;
+    }
 
     var fn = arguments[arguments.length - 1];
     var toolItem = {};
@@ -618,9 +622,9 @@
    */
   function createIcon(item, defaultKeys) {
     var isNotLink = typeof(item) === 'string';
-    var name = isNotLink ? item.name : item;
+    var name = item.name || item;
 
-    if (!isNotLink) {
+    if (isNotLink) {
       var sep = document.createElement('i');
       sep.className = 'separator';
       sep.innerHTML = name;

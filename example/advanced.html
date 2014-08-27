@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Try Editor Ninja</title>
+  <link rel="stylesheet" href="../bower_components/codemirror/lib/codemirror.css">
+  <script src="../bower_components/codemirror/lib/codemirror.js"></script>
+  <script src="../bower_components/codemirror/mode/markdown/markdown.js"></script>
+  <script src="../bower_components/codemirror/mode/gfm/gfm.js"></script>
+  <script src="../src/ninja.js"></script>
+</head>
+<body>
+  <textarea name="editor" id="editor" cols="30" rows="10">123</textarea>
+  <script>
+    (function(){
+      window.editor = new ninja();
+      
+      editor
+        .tool('custom', toolAction)
+        .tool('mysite', 'http://airpub.io')
+        .tool('|')
+        .tool('inject', injectText)
+        .tool('inject-custom-html', '<span class="haha">customHtml<i class="fa fa-home"></i></span>', bindclick)
+        .render();
+
+      function toolAction(editor) {
+        alert('just clicked!');
+      }
+
+      function injectText(editor) {
+        return editor.inject('you have been hacked!');
+      }
+
+      function bindclick(editor, el) {
+        return editor.inject(el.innerHtml);
+      }
+    })();
+  </script>
+</body>
+</html>
