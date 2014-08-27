@@ -125,6 +125,7 @@
     if (this._rendered && this._rendered === ele) 
       return;
 
+    this.keyMaps = initKeyMaps(this.keyMaps);
     var codeMirrorOptions = {};
     codeMirrorOptions.mode = 'markdown';
     codeMirrorOptions.theme = 'zen';
@@ -165,26 +166,7 @@
 
     for (var i = 0; i < items.length; i++) {
       (function(item) {
-        var el;
-        if (item === '|')
-          el = createSep();
-        else
-          el = createIcon(item.name, item);
-
-        if (item.href) {
-          el.href = item.action;
-          el.target = '_blank';
-        }
-        if (item.html) {
-          el.innerHTML = item.html;
-        }
-        // bind events, special for info
-        if (item.action) {
-          el.onclick = function(eve) {
-            item.action(self, el, eve);
-          };
-        }
-        el.className += item.class;
+        var el = createIcon(item, self.keyMaps);
         self.tools[item.name || item] = el;
         bar.appendChild(el);
       })(items[i]);
@@ -629,6 +611,47 @@
 
     cm.setSelection(startPoint, endPoint);
     cm.focus();
+  }
+
+  /**
+   * Create icon element for toolbar.
+   */
+  function createIcon(item, defaultKeys) {
+    var isNotLink = typeof(item) === 'string';
+    var name = isNotLink ? item.name : item;
+
+    if (!isNotLink) {
+      var sep = document.createElement('i');
+      sep.className = 'separator';
+      sep.innerHTML = name;
+      return sep;
+    }
+
+    var el = document.createElement('a');
+
+    if (defaultKeys[name]) {
+      el.title = defaultKeys[name];
+      el.title = el.title.replace('Cmd', '⌘');
+      if (/Mac/.test(navigator.platform))
+        el.title = el.title.replace('Alt', '⌥');
+    }
+
+    if (item.href) {
+      el.href = item.href;
+      el.target = '_blank';
+    }
+
+    if (item.html) 
+      el.innerHTML = item.html;
+
+    el.className += item.class || 'icon-' + name;
+
+    if (item.action) {
+      el.onclick = function(eve) {
+        item.action(self, el, eve);
+      };
+    }
+    return el;
   }
 
   /**
