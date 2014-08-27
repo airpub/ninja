@@ -12,8 +12,29 @@
 <body>
   <textarea name="editor" id="editor" cols="30" rows="10">123</textarea>
   <script>
-    var editor = new ninja();
-    editor.render();
+    (function(){
+      window.editor = new ninja();
+      
+      editor
+        .tool('custom', toolAction)
+        .tool('mysite', 'http://airpub.io')
+        .tool('|')
+        .tool('inject', injectText)
+        .tool('inject-custom-html', '<span class="haha"><i class="fa fa-home"></i></span>', bindclick)
+        .render();
+
+      function toolAction(editor) {
+        alert('just clicked!');
+      }
+
+      function injectText(editor) {
+        return editor.inject('you have been hacked!');
+      }
+
+      function bindclick(editor, el) {
+        return editor.inject(el.innerHtml);
+      }
+    })();
   </script>
 </body>
 </html>

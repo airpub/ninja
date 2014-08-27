@@ -16,7 +16,10 @@
       angular
         .module('ninja', ['upyun'])
         .service('ninja', ninja)
-        .directive('ninja', ['$upyun', '$timeout', ninjaDirective]);
+        .directive('ninja', [
+          'ninja','$upyun', '$timeout', 
+          ninjaDirective]
+        );
     else
       window.ninja = fn;
   })(Ninja);
@@ -78,11 +81,31 @@
   *   (new Ninja()).tool('customTool', function(){ console.log('new tool!') })
   *
   **/
-  Ninja.prototype.tool = function tool(name, action) {
+  Ninja.prototype.tool = function tool(name, metaString) {
     if (!this.toolbar)
       this.toolbar = [];
-    if (name && action)
-      this.toolbar.push(tool);
+
+    if (name === '|')
+      this.toolbar.push(name);
+
+    if (name && typeof(name) === 'string') {
+      var fn = arguments[arguments.length - 1];
+      var toolItem = {};
+      toolItem.name = name;
+      toolItem.class = 'ninja-tool-' + name;
+
+      if (typeof(metaString) === 'string') {
+        if (metaString.indexOf('http') === 0 || metaString.indexOf('https') === 0)
+          toolItem.href = metaString;
+        else
+          toolItem.html = metaString;
+      }
+
+      if (fn && typeof(fn) === 'function')
+        toolItem.action = fn;
+
+      this.toolbar.push(toolItem);
+    }
     return this;
   };
 
@@ -114,9 +137,9 @@
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
 
-    if (this.options && this.options.toolbar !== false) 
+    if (!this.options || (this.options && this.options.toolbar !== false)) 
       this.createToolbar();
-    if (this.options && this.options.statusbar !== false) 
+    if (!this.options || (this.options && this.options.statusbar !== false)) 
       this.createStatusbar();
 
     this._rendered = ele;
@@ -125,7 +148,7 @@
 
   /**
   *
-  * Create a toolbar on bottom of the editor
+  * Create a toolbar on top of the editor
   *
   **/
   Ninja.prototype.createToolbar = function(items) {
@@ -140,42 +163,44 @@
     var self = this;
 
     var el;
-    self.toolbar = {};
+    self.tools = {};
 
     for (var i = 0; i < items.length; i++) {
       (function(item) {
         var el;
-        if (item.name) {
-          el = createIcon(item.name, item);
-        } else if (item === '|') {
+        if (item === '|')
           el = createSep();
-        } else {
-          el = createIcon(item);
+        else
+          el = createIcon(item.name, item);
+
+        if (item.href) {
+          el.href = item.action;
+          el.target = '_blank';
+        }
+
+        if (item.html) {
+          el.innerHTML = item.html;
         }
 
         // bind events, special for info
         if (item.action) {
-          if (typeof item.action === 'function') {
-            el.onclick = function(e) {
-              item.action(self);
-            };
-          } else if (typeof item.action === 'string') {
-            el.href = item.action;
-            el.target = '_blank';
-          }
+          el.onclick = function(e) {
+            item.action(self);
+          };
         }
-        self.toolbar[item.name || item] = el;
+        self.tools[item.name || item] = el;
         bar.appendChild(el);
       })(items[i]);
     }
 
+    // toggle active status
     var cm = this.codemirror;
     cm.on('cursorActivity', function() {
       var stat = getState(cm);
 
-      for (var key in self.toolbar) {
+      for (var key in self.tools) {
         (function(key) {
-          var el = self.toolbar[key];
+          var el = self.tools[key];
           if (stat[key]) {
             el.className += ' active';
           } else {
@@ -260,6 +285,9 @@
   Ninja.prototype.trigger = function(type) {
     return trigger(type)(this.codemirror);
   };
+  Ninja.prototype.inject = function() {
+    return inject(this.codemirror, arguments);
+  }
 
   /*======================================
   =            Editor's Utils            =
@@ -544,6 +572,7 @@
   function getState(cm, pos) {
     pos = pos || cm.getCursor('start');
     var stat = cm.getTokenAt(pos);
+    console.log(stat);
 
     if (!stat.type) return {};
 
@@ -551,20 +580,26 @@
 
     var ret = {}, data, text;
     for (var i = 0; i < types.length; i++) {
-      data = types[i];
-      if (data === 'strong') {
-        ret.bold = true;
-      } else if (data === 'variable-2') {
-        // check `variable-2` is which type of list
-        text = cm.getLine(pos.line);
-        if (/^\s*\d+\.\s/.test(text))
-          ret['ordered-list'] = true;
-        else
-          ret['unordered-list'] = true;
-      } else if (data === 'quote') {
-        ret.quote = true;
-      } else if (data === 'em') {
-        ret.italic = true;
+      switch (types[i]) {
+        case 'strong':
+          ret.bold = true;
+        break;
+        case 'quote':
+          ret.quote = true;
+        break;
+        case 'em':
+          ret.italic = true;
+        case 'link':
+          ret.link = true;
+        case 'variable-2':
+          text = cm.getLine(pos.line);
+          if (/^\s*\d+\.\s/.test(text))
+            ret['ordered-list'] = true;
+          else
+            ret['unordered-list'] = true;
+        break;
+        default:
+        break;
       }
     }
     return ret;
@@ -583,6 +618,7 @@
     var startPoint = cm.getCursor('start');
     var endPoint = cm.getCursor('end');
     if (active) {
+      console.log(active);
       text = cm.getLine(startPoint.line);
       start = text.slice(0, startPoint.ch);
       end = text.slice(startPoint.ch);
@@ -594,6 +630,28 @@
       startPoint.ch += start.length;
       endPoint.ch += start.length;
     }
+    cm.setSelection(startPoint, endPoint);
+    cm.focus();
+  }
+
+  /**
+  *
+  * inject text into current Pos
+  *
+  **/
+  function inject(cm, texts) {
+    if (!cm) return;
+
+    var startPoint = cm.getCursor('start');
+    var endPoint = cm.getCursor('end');
+
+    cm.replaceSelection(texts.join());
+    
+    if (texts.length > 1) {
+      startPoint.ch += texts[0].length;
+      endPoint.ch += texts[0].length;
+    }
+
     cm.setSelection(startPoint, endPoint);
     cm.focus();
   }
@@ -700,7 +758,7 @@
   =               Directives                    =
   =============================================*/  
 
-  function ninjaDirective($upyun, $timeout) {
+  function ninjaDirective(ninja, $upyun, $timeout) {
     var directive = {
       restrict: 'AE',
       require: 'ngModel',
