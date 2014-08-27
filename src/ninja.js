@@ -330,9 +330,12 @@
             text = text.replace(style.re[type], '$1');
           else
             text = style.prepend + text;
-          console.log(text);
-          console.log(cm.doc.changeLine);
-          cm.setLine(i, text);
+          cm.doc.replaceRange(text, {
+            line: i,
+            ch: 0
+          }, {
+            line: i // the end of a line
+          });
         })(i);
       }
       cm.focus();
