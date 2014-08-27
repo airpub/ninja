@@ -26,6 +26,6 @@
     "tests"
   ],
   "dependencies": {
-    "codemirror": "~4.5.0"
+    "codemirror": "4.5.0"
   }
 }

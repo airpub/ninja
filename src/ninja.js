@@ -282,6 +282,8 @@
   function toggle(type) {
     var toggleTextList = ['bold', 'italic'];
 
+    return toggleWhatever;
+
     function toggleWhatever(cm) {
       if (!cm) 
         return;
@@ -306,10 +308,10 @@
     **/
     function toggleBlock(type, cm) {
       var stat = getState(cm);
-      var startPoint = cm.doc.getCursor('start');
-      var endPoint = cm.doc.getCursor('end');
+      var startPoint = cm.getCursor('start');
+      var endPoint = cm.getCursor('end');
       var styleMap = {
-        quote: {
+        'quote': {
           re: /^(\s*)\>\s+/,
           prepend: '> '
         },
@@ -319,23 +321,30 @@
         },
         'ordered-list': {
           re: /^(\s*)\d+\.\s+/,
-          prepend: '1. '
+          prepend: '. '
         }
       };
       var style = styleMap[type];
       for (var i = startPoint.line; i <= endPoint.line; i++) {
         (function(i) {
-          var text = cm.doc.getLine(i);
-          if (stat[type])
-            text = text.replace(style.re[type], '$1');
-          else
-            text = style.prepend + text;
-          cm.doc.replaceRange(text, {
-            line: i,
-            ch: 0
-          }, {
-            line: i // the end of a line
-          });
+          var text = cm.getLine(i);
+          // Check if user is switching unorderlist and orderlist
+          var isSwitchToOrderedList = (type === 'ordered-list' && stat['unordered-list']);
+          var isSwitchToUnorderList = (type === 'unordered-list' && stat['ordered-list']);
+          
+          if (isSwitchToOrderedList)
+            text = text.replace(styleMap['unordered-list'].re, '$1');
+          if (isSwitchToUnorderList)
+            text = text.replace(styleMap['ordered-list'].re, '$1');
+
+          if (stat[type]) {
+            text = text.replace(style.re, '$1');
+          } else {
+            text = (type === 'ordered-list') ?
+              ((i + 1) + style.prepend + text) :  
+              style.prepend + text;
+          }
+          setLine(i, text, cm);
         })(i);
       }
       cm.focus();
@@ -373,6 +382,8 @@
         }
       };
 
+      return toggleTextByStyle;
+
       function toggleTextByStyle(cm) {
         var style = styleMap[type];
         var stat = getState(cm);
@@ -394,7 +405,8 @@
 
           startPoint.ch -= style.offset;
           endPoint.ch -= style.offset;
-          cm.setLine(startPoint.line, start + end);
+
+          setLine(startPoint.line, start + end, cm);
         } else {
           text = cm.getSelection();
           cm.replaceSelection(start + text + end);
@@ -405,8 +417,6 @@
         cm.setSelection(startPoint, endPoint);
         cm.focus();
       }
-
-      return toggleTextByStyle;
     }
 
     /**
@@ -482,8 +492,6 @@
       var text = cm.getValue();
       preview.innerHTML = parse(text);
     }
-
-    return toggleWhatever;
   }
 
   /**
@@ -496,18 +504,16 @@
   *
   **/
   function draw(type) {
-    return drawWhatever;
-
-    var typeMap = {
+    var styleMap = {
       link: ['[', '](http://)'],
       image: ['![', '](http://)']
     };
 
+    return drawWhatever;
+
     function drawWhatever(cm) {
-      console.log(cm);
       var stat = getState(cm);
-      console.log(stat);
-      replaceSelection(cm, stat[type], typeMap[type][0], typeMap[type][1])
+      replaceSelection(cm, stat[type], styleMap[type][0], styleMap[type][1])
     }
   }
 
@@ -535,13 +541,13 @@
    * 
    * The state of CodeMirror at the given position.
    *
-   * @todo [replace `setLine` and `removeLine` method by `replaceRange`]
-   *
    */
   function getState(cm, pos) {
-    pos = pos || cm.doc.getCursor('start');
+    pos = pos || cm.getCursor('start');
     var stat = cm.getTokenAt(pos);
+
     console.log(stat);
+
     if (!stat.type) return {};
 
     var types = stat.type.split(' ');
@@ -552,12 +558,12 @@
       if (data === 'strong') {
         ret.bold = true;
       } else if (data === 'variable-2') {
-        text = cm.doc.getLine(pos.line);
-        if (/^\s*\d+\.\s/.test(text)) {
+        // check `variable-2` is which type of list
+        text = cm.getLine(pos.line);
+        if (/^\s*\d+\.\s/.test(text))
           ret['ordered-list'] = true;
-        } else {
+        else
           ret['unordered-list'] = true;
-        }
       } else if (data === 'atom') {
         ret.quote = true;
       } else if (data === 'em') {
@@ -577,21 +583,21 @@
   **/
   function replaceSelection(cm, active, start, end) {
     var text;
-    var startPoint = cm.doc.getCursor('start');
-    var endPoint = cm.doc.getCursor('end');
+    var startPoint = cm.getCursor('start');
+    var endPoint = cm.getCursor('end');
     if (active) {
-      text = cm.doc.getLine(startPoint.line);
+      text = cm.getLine(startPoint.line);
       start = text.slice(0, startPoint.ch);
       end = text.slice(startPoint.ch);
-      cm.setLine(startPoint.line, start + end);
+      setLine(startPoint.line, start + end, cm);
     } else {
-      text = cm.doc.getSelection();
+      text = cm.getSelection();
       cm.replaceSelection(start + text + end);
 
       startPoint.ch += start.length;
       endPoint.ch += start.length;
     }
-    cm.doc.setSelection(startPoint, endPoint);
+    cm.setSelection(startPoint, endPoint);
     cm.focus();
   }
 
@@ -613,6 +619,17 @@
       }
     }
     return count;
+  }
+
+  function setLine(line, text, cm) {
+    var lineStart = {
+      line: line,
+      ch: 0
+    };
+    var lineEnd = {
+      line: line
+    };
+    cm.replaceRange(text, lineStart, lineEnd);
   }
 
   /*=============================================
