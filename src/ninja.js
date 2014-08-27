@@ -328,14 +328,13 @@
       for (var i = startPoint.line; i <= endPoint.line; i++) {
         (function(i) {
           var text = cm.getLine(i);
-          // Check if user is switching unorderlist and orderlist
-          var isSwitchToOrderedList = (type === 'ordered-list' && stat['unordered-list']);
-          var isSwitchToUnorderList = (type === 'unordered-list' && stat['ordered-list']);
-          
-          if (isSwitchToOrderedList)
-            text = text.replace(styleMap['unordered-list'].re, '$1');
-          if (isSwitchToUnorderList)
-            text = text.replace(styleMap['ordered-list'].re, '$1');
+
+          // TODO: Object.keys() function may not exist in older browers.
+          var olderTypes = Object.keys(stat);
+          var hasTypeBefore = olderTypes.length > 0 && type !== olderTypes[0];
+
+          if (hasTypeBefore)
+            text = text.replace(styleMap[olderTypes[0]].re, '$1');
 
           if (stat[type]) {
             text = text.replace(style.re, '$1');
