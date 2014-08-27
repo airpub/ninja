@@ -82,30 +82,30 @@
   *
   **/
   Ninja.prototype.tool = function tool(name, metaString) {
+    if (!name || typeof(name) !== 'string')
+      return;
     if (!this.toolbar)
       this.toolbar = [];
-
     if (name === '|')
       this.toolbar.push(name);
 
-    if (name && typeof(name) === 'string') {
-      var fn = arguments[arguments.length - 1];
-      var toolItem = {};
-      toolItem.name = name;
-      toolItem.class = 'ninja-tool-' + name;
+    var fn = arguments[arguments.length - 1];
+    var toolItem = {};
+    toolItem.name = name;
+    toolItem.class = 'ninja-tool-' + name;
 
-      if (typeof(metaString) === 'string') {
-        if (metaString.indexOf('http') === 0 || metaString.indexOf('https') === 0)
-          toolItem.href = metaString;
-        else
-          toolItem.html = metaString;
-      }
-
-      if (fn && typeof(fn) === 'function')
-        toolItem.action = fn;
-
-      this.toolbar.push(toolItem);
+    if (typeof(metaString) === 'string') {
+      if (metaString.indexOf('http') === 0 || metaString.indexOf('https') === 0)
+        toolItem.href = metaString;
+      else
+        toolItem.html = metaString;
     }
+
+    if (fn && typeof(fn) === 'function')
+      toolItem.action = fn;
+
+    this.toolbar.push(toolItem);
+
     return this;
   };
 
@@ -137,8 +137,9 @@
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
 
-    if (!this.options || (this.options && this.options.toolbar !== false)) 
-      this.createToolbar();
+    if (!this.options || (this.options && this.options.toolbar !== false)) {
+      this.createToolbar(this.toolbar || initToolbar());
+    }
     if (!this.options || (this.options && this.options.statusbar !== false)) 
       this.createStatusbar();
 
@@ -152,10 +153,7 @@
   *
   **/
   Ninja.prototype.createToolbar = function(items) {
-    items = items || this.toolbar;
-
-    if (!items || items.length === 0)
-      return;
+    if (!items || items.length === 0) return;
 
     var bar = document.createElement('div');
     bar.className = 'editor-toolbar';
@@ -177,17 +175,16 @@
           el.href = item.action;
           el.target = '_blank';
         }
-
         if (item.html) {
           el.innerHTML = item.html;
         }
-
         // bind events, special for info
         if (item.action) {
-          el.onclick = function(e) {
-            item.action(self);
+          el.onclick = function(eve) {
+            item.action(self, el, eve);
           };
         }
+        el.className += item.class;
         self.tools[item.name || item] = el;
         bar.appendChild(el);
       })(items[i]);
@@ -531,7 +528,7 @@
   *
   **/
   function draw(type) {
-    var styleMap = {
+    var placeholders = {
       link: ['[', '](http://)'],
       image: ['![', '](http://)']
     };
@@ -540,7 +537,7 @@
 
     function drawWhatever(cm) {
       var stat = getState(cm);
-      replaceSelection(cm, stat[type], styleMap[type][0], styleMap[type][1])
+      inject(cm, placeholders[type], stat[type]);
     }
   }
 
@@ -572,7 +569,6 @@
   function getState(cm, pos) {
     pos = pos || cm.getCursor('start');
     var stat = cm.getTokenAt(pos);
-    console.log(stat);
 
     if (!stat.type) return {};
 
@@ -607,46 +603,25 @@
 
   /**
   *
-  * Replace current wrapped text in given string
-  * 
-  * @param {[String]} [start] [the start of given string]
-  * @param {[String]} [end] [the end of given string]
-  *
-  **/
-  function replaceSelection(cm, active, start, end) {
-    var text;
-    var startPoint = cm.getCursor('start');
-    var endPoint = cm.getCursor('end');
-    if (active) {
-      console.log(active);
-      text = cm.getLine(startPoint.line);
-      start = text.slice(0, startPoint.ch);
-      end = text.slice(startPoint.ch);
-      setLine(startPoint.line, start + end, cm);
-    } else {
-      text = cm.getSelection();
-      cm.replaceSelection(start + text + end);
-
-      startPoint.ch += start.length;
-      endPoint.ch += start.length;
-    }
-    cm.setSelection(startPoint, endPoint);
-    cm.focus();
-  }
-
-  /**
-  *
   * inject text into current Pos
   *
+  * @param {[Array]} [texts]
+  *
   **/
-  function inject(cm, texts) {
+  function inject(cm, texts, triggered) {
     if (!cm) return;
 
     var startPoint = cm.getCursor('start');
     var endPoint = cm.getCursor('end');
+    var text = cm.getSelection();
+    // todo: toggle link/image 
 
-    cm.replaceSelection(texts.join());
-    
+    cm.replaceSelection(
+      texts.length > 1 ? 
+      texts[0] + text + texts[1] :
+      text + texts.join()
+    );
+
     if (texts.length > 1) {
       startPoint.ch += texts[0].length;
       endPoint.ch += texts[0].length;
