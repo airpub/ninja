@@ -110,7 +110,7 @@
     codeMirrorOptions.extraKeys = initKeyMaps(this.keyMaps);
 
     if (ele.value !== '') 
-      codeMirrorOptions.value = element.value;
+      codeMirrorOptions.value = ele.value;
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
 
@@ -546,8 +546,6 @@
     pos = pos || cm.getCursor('start');
     var stat = cm.getTokenAt(pos);
 
-    console.log(stat);
-
     if (!stat.type) return {};
 
     var types = stat.type.split(' ');
@@ -564,7 +562,7 @@
           ret['ordered-list'] = true;
         else
           ret['unordered-list'] = true;
-      } else if (data === 'atom') {
+      } else if (data === 'quote') {
         ret.quote = true;
       } else if (data === 'em') {
         ret.italic = true;
