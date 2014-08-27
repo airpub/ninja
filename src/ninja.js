@@ -290,7 +290,7 @@
       if (type === 'fullscreen')
         return toggleFullScreen(cm);
 
-      return toggleBlock(cm, type);
+      return toggleBlock(type, cm);
     }
 
     /**
@@ -306,8 +306,8 @@
     **/
     function toggleBlock(type, cm) {
       var stat = getState(cm);
-      var startPoint = cm.getCursor('start');
-      var endPoint = cm.getCursor('end');
+      var startPoint = cm.doc.getCursor('start');
+      var endPoint = cm.doc.getCursor('end');
       var styleMap = {
         quote: {
           re: /^(\s*)\>\s+/,
@@ -325,11 +325,13 @@
       var style = styleMap[type];
       for (var i = startPoint.line; i <= endPoint.line; i++) {
         (function(i) {
-          var text = cm.getLine(i);
+          var text = cm.doc.getLine(i);
           if (stat[type])
             text = text.replace(style.re[type], '$1');
           else
-            text = style.prepend[type] + text;
+            text = style.prepend + text;
+          console.log(text);
+          console.log(cm.doc.changeLine);
           cm.setLine(i, text);
         })(i);
       }
@@ -499,7 +501,9 @@
     };
 
     function drawWhatever(cm) {
+      console.log(cm);
       var stat = getState(cm);
+      console.log(stat);
       replaceSelection(cm, stat[type], typeMap[type][0], typeMap[type][1])
     }
   }
@@ -528,10 +532,13 @@
    * 
    * The state of CodeMirror at the given position.
    *
+   * @todo [replace `setLine` and `removeLine` method by `replaceRange`]
+   *
    */
   function getState(cm, pos) {
-    pos = pos || cm.getCursor('start');
+    pos = pos || cm.doc.getCursor('start');
     var stat = cm.getTokenAt(pos);
+    console.log(stat);
     if (!stat.type) return {};
 
     var types = stat.type.split(' ');
@@ -542,7 +549,7 @@
       if (data === 'strong') {
         ret.bold = true;
       } else if (data === 'variable-2') {
-        text = cm.getLine(pos.line);
+        text = cm.doc.getLine(pos.line);
         if (/^\s*\d+\.\s/.test(text)) {
           ret['ordered-list'] = true;
         } else {
@@ -567,21 +574,21 @@
   **/
   function replaceSelection(cm, active, start, end) {
     var text;
-    var startPoint = cm.getCursor('start');
-    var endPoint = cm.getCursor('end');
+    var startPoint = cm.doc.getCursor('start');
+    var endPoint = cm.doc.getCursor('end');
     if (active) {
-      text = cm.getLine(startPoint.line);
+      text = cm.doc.getLine(startPoint.line);
       start = text.slice(0, startPoint.ch);
       end = text.slice(startPoint.ch);
       cm.setLine(startPoint.line, start + end);
     } else {
-      text = cm.getSelection();
+      text = cm.doc.getSelection();
       cm.replaceSelection(start + text + end);
 
       startPoint.ch += start.length;
       endPoint.ch += start.length;
     }
-    cm.setSelection(startPoint, endPoint);
+    cm.doc.setSelection(startPoint, endPoint);
     cm.focus();
   }
 
