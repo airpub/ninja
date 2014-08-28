@@ -135,10 +135,11 @@
       name: 'markdown',
       underscoresBreakWords: false,
       taskLists: true,
-      fencedCodeBlocks: true,
-      highlightFormatting: true
+      fencedCodeBlocks: true
+      // highlightFormatting: true
     };
     codeMirrorOptions.theme = 'zen';
+    codeMirrorOptions.tabSize = 2;
     codeMirrorOptions.lineNumbers = false;
     codeMirrorOptions.lineWrapping = true;
     codeMirrorOptions.autoCloseBrackets = true;
@@ -718,7 +719,7 @@
         var codes = codeEnd - codeStart;
 
         if (codes === 1) return;
-        
+
         var count = codeStart + 1;
         for (var i = 0; i < (codes - 1); i++) {
           (function(i){
@@ -731,6 +732,7 @@
   }
 
   function fixCodeHighlight(cm) {
+    return findCodesAndAddClass(cm, 'ff-monospace'); // just for test.
     var startPoint = cm.getCursor('start');
     var token = cm.getTokenAt(startPoint);
     var codeTypeList = ['variable', 'comment', 'formatting-code-block', 'property', 'number', 'tag']

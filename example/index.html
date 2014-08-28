@@ -31,9 +31,6 @@
 <body>
   <div id="wrapper" class="wrapper">
   <textarea name="editor" id="editor" cols="30" rows="10">
-GitHub Flavored Markdown
-========================
-
 Everything from markdown plus GFM features:
 
 ## URL autolinking
@@ -45,13 +42,17 @@ Underscores_are_allowed_between_words.
 javascript:
 
 ```js
-for (var i = 0; i < items.length; i++) {
-    console.log(items[i], i); // log them
+var a = 'im a string';
+function htmlBlock(stream, state) {
+  var style = htmlMode.token(stream, state.htmlState);
+  if ((htmlFound && state.htmlState.tagStart === null && !state.htmlState.context) ||
+      (state.md_inside && stream.current().indexOf(">") > -1)) {
+    state.f = inlineNormal;
+    state.block = blockNormal;
+    state.htmlState = null;
+  }
+  return style;
 }
-```
-
-```json
-{a: b}
 ```
 
 css:
@@ -60,7 +61,6 @@ css:
 .CodeMirror {
   height: 600px;
   min-height: 600px;
-  font: 16px/1.5 "Helvetica Neue", "Helvetica", "Xin Gothic", "Hiragino Sans GB", "WenQuanYi Micro Hei", "Microsoft YaHei", sans-serif;
   background-color: transparent;
 }
 ```
