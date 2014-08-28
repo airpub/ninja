@@ -131,16 +131,24 @@
 
     this.keyMaps = initKeyMaps(this.keyMaps);
     var codeMirrorOptions = {};
-    codeMirrorOptions.mode = 'gfm';
+    codeMirrorOptions.mode = {
+      name: 'markdown',
+      underscoresBreakWords: false,
+      taskLists: true,
+      fencedCodeBlocks: true,
+      highlightFormatting: true
+    };
     codeMirrorOptions.theme = 'zen';
     codeMirrorOptions.lineNumbers = false;
     codeMirrorOptions.lineWrapping = true;
+    codeMirrorOptions.autoCloseBrackets = true;
     codeMirrorOptions.extraKeys = initKeyMaps(this.keyMaps);
 
     if (ele.value !== '') 
       codeMirrorOptions.value = ele.value;
 
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
+    this.codemirror.on('change', fixCodeHighlight);
 
     if (!this.options || (this.options && this.options.toolbar !== false)) {
       this.createToolbar(this.toolbar || initToolbar());
@@ -687,6 +695,11 @@
       line: line
     };
     cm.replaceRange(text, lineStart, lineEnd);
+  }
+
+  function fixCodeHighlight(cm) {
+    var startPoint = cm.getCursor('start');
+    cm.addLineClass(startPoint.line, 'text', 'hahahhahah');
   }
 
   /*=============================================

@@ -6,6 +6,10 @@
   background-color: transparent;
 }
 
+.CodeMirror-focused .CodeMirror-selected { 
+  background: #d9d9d9; 
+}
+
 /* Theme: Zen */
 .cm-s-zen {
   .cm-keyword {
@@ -20,17 +24,17 @@
   .cm-def {
     color: #00f;
   }
-  .cm-variable {
+  .cm-variable,
+  .cm-punctuation,
+  .cm-property,
+  .cm-operator {
     color: black;
+  }
+  .cm-variable-2 {
+    color: #999;
   }
   .cm-variable-3 {
     color: #085;
-  }
-  .cm-property {
-    color: black;
-  }
-  .cm-operator {
-    color: black;
   }
   .cm-comment {
     color: #a50;
@@ -44,11 +48,11 @@
   .cm-meta {
     color: #555;
   }
-  .cm-error {
-    color: #f00;
-  }
   .cm-qualifier {
     color: #555;
+  }
+  .cm-error {
+    color: #f00;
   }
   .cm-builtin {
     color: #555;
@@ -78,7 +82,8 @@
     padding-left: 0px;
     margin-left: 0px;
   }
-  // js
+  .attribute,
+  .cm-bracket,
   .cm-keyword, 
   .cm-variable, 
   .cm-number, 
