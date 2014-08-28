@@ -1,4 +1,6 @@
-## Editor Ninja
+## Editor Ninja (WIP)
+
+Still Work in process.
 
 a hackable Markdown editor. inspired by letpture's [editor](https://github.com/lepture/editor).
 

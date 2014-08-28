@@ -155,7 +155,7 @@
       findCodesAndAddClass(this.codemirror, 'ff-monospace');
 
     if (!this.options || (this.options && this.options.toolbar !== false)) {
-      this.createToolbar(this.toolbar || initToolbar());
+      this.createToolbar(this.toolbar || initToolbar(null, this.codemirror));
     }
     if (!this.options || (this.options && this.options.statusbar !== false)) 
       this.createStatusbar();
@@ -635,11 +635,18 @@
   function createIcon(item, defaultKeys) {
     var isNotLink = typeof(item) === 'string';
     var name = item.name || item;
+    var iconMap = {
+      'quote': 'quote-left',
+      'ordered-list':'list-ol',
+      'unordered-list': 'list',
+      'upload': 'cloud-upload',
+      'fullscreen': 'expand'
+    };
 
     if (isNotLink) {
       var sep = document.createElement('i');
       sep.className = 'separator';
-      sep.innerHTML = name;
+      // sep.innerHTML = name;
       return sep;
     }
 
@@ -660,10 +667,11 @@
     if (item.html) 
       el.innerHTML = item.html;
 
-    el.className += item.class || 'icon-' + name;
+    el.className += item.class || (iconMap[name] ? 'fa fa-' + iconMap[name] : 'fa fa-' + name);
 
     if (item.action) {
       el.onclick = function(eve) {
+        console.log(item.action);
         item.action(self, el, eve);
       };
     }
@@ -791,22 +799,27 @@
   * @param {[Obejct]} [customToolbar]
   *
   **/
-  function initToolbar(customToolbar) {
+  function initToolbar(customToolbar, cm) {
     var defaultToolbar = [
-      {name: 'bold', action: toggle('bold')},
-      {name: 'italic', action: toggle('italic')},
+      {name: 'bold', action: trigger(toggle,'bold', cm)},
+      {name: 'italic', action: trigger(toggle,'italic', cm)},
       '|',
-      {name: 'quote', action: toggle('quote')},
-      {name: 'unordered-list', action: toggle('unordered-list')},
-      {name: 'ordered-list', action: toggle('ordered-list')},
+      {name: 'quote', action: trigger(toggle,'quote', cm)},
+      {name: 'unordered-list', action: trigger(toggle, 'unordered-list', cm)},
+      {name: 'ordered-list', action: trigger(toggle,'ordered-list', cm)},
       '|',
-      {name: 'link', action: draw('link')},
-      {name: 'image', action: draw('image')},
-      {name: 'uploadImage', action: draw('upload-image')},
-      '|',
-      {name: 'fullscreen', action: toggle('fullscreen')}
+      {name: 'link', action: trigger(draw,'link', cm)},
+      {name: 'image', action: trigger(draw,'image', cm)},
+      {name: 'upload', action: trigger(draw,'upload-image', cm)},
+      {name: 'fullscreen', action: trigger(toggle,'fullscreen', cm)}
     ];
     return customToolbar || defaultToolbar;
+
+    function trigger(method, type, cm) {
+      return function() {
+        return method(type)(cm);
+      }
+    }
   }
 
   /*=============================================
