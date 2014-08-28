@@ -333,6 +333,8 @@
       var stat = getState(cm);
       var startPoint = cm.getCursor('start');
       var endPoint = cm.getCursor('end');
+      var count = 1;
+      var gap = endPoint.line - startPoint.line;
       var styleMap = {
         'quote': {
           re: /^(\s*)\>\s+/,
@@ -362,9 +364,17 @@
           if (stat[type]) {
             text = text.replace(style.re, '$1');
           } else {
-            text = (type === 'ordered-list') ?
-              ((i + 1) + style.prepend + text) :  
-              style.prepend + text;
+            if (type === 'ordered-list') {
+              // count how many line we want to add order.
+              if (gap !== 0) {
+                text = count + style.prepend + text;
+                count ++;
+              } else {
+                text = 1 + style.prepend + text;
+              }
+            } else {
+              text = style.prepend + text;
+            }
           }
           setLine(i, text, cm);
         })(i);
