@@ -5,14 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "bin/build.sh",
-    "build-setup": "npm run build-codemirror && npm run build",
-    "build-codemirror": "bin/build-codemirror.sh",
     "build-docs": "node_modules/.bin/jsdoc src/ninja.js --destination docs",
-    "less": "node_modules/.bin/lessc -x src/ninja.less dist/ninja.min.css",
+    "build-less": "node_modules/.bin/lessc -x src/less/ninja.less dist/ninja.min.css",
+    "watch-less": "node_modules/.bin/rewatch src/less/*.less -c 'npm run build-less'",
     "serve": "node_modules/.bin/serve --no-less .",
-    "watch-js": "node_modules/.bin/rewatch src/*.js -c 'npm run build'",
-    "watch-less": "node_modules/.bin/rewatch src/*.less -c 'npm run less'",
-    "dev": "npm run serve & npm run watch-js"
+    "dev": "npm run serve && npm run watch-less"
   },
   "repository": {
     "type": "git",
