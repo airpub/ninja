@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Try Editor Ninja</title>
   <link rel="stylesheet" href="../bower_components/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="../dist/ninja.min.css">
   <script src="../bower_components/codemirror/lib/codemirror.js"></script>
   <script src="../bower_components/codemirror/addon/mode/overlay.js"></script>
   <script src="../bower_components/codemirror/mode/xml/xml.js"></script>
@@ -12,10 +13,23 @@
   <script src="../bower_components/codemirror/mode/javascript/javascript.js"></script>
   <script src="../bower_components/codemirror/mode/css/css.js"></script>
   <script src="../bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
-  <script src="../src/javascript/commands.js"></script>
+  <script src="../src/javascript/continuelist.js"></script>
   <script src="../src/javascript/ninja.js"></script>
+  <style>
+    body {
+      background-color: #f5f5f5;
+    }
+    .wrapper {
+      margin-top: 30px;
+      width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background-color: #f5f5f5;
+    }
+  </style>
 </head>
 <body>
+  <div id="wrapper" class="wrapper">
   <textarea name="editor" id="editor" cols="30" rows="10">
 GitHub Flavored Markdown
 ========================
@@ -29,7 +43,7 @@ Underscores_are_allowed_between_words.
 ## Fenced code blocks (and syntax highlighting)
 
 ```javascript
-for (var i = 0; i &lt; items.length; i++) {
+for (var i = 0; i < items.length; i++) {
     console.log(items[i], i); // log them
 }
 ```
@@ -50,6 +64,7 @@ for (var i = 0; i &lt; items.length; i++) {
 
 See http://github.github.com/github-flavored-markdown/.
   </textarea>
+  </div>
   <script>
     new ninja(document.getElementById('editor'));
   </script>

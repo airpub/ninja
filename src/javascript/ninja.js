@@ -132,7 +132,7 @@
     this.keyMaps = initKeyMaps(this.keyMaps);
     var codeMirrorOptions = {};
     codeMirrorOptions.mode = 'gfm';
-    codeMirrorOptions.theme = 'ninja';
+    codeMirrorOptions.theme = 'zen';
     codeMirrorOptions.lineNumbers = false;
     codeMirrorOptions.lineWrapping = true;
     codeMirrorOptions.extraKeys = initKeyMaps(this.keyMaps);

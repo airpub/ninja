@@ -9,7 +9,7 @@ node_modules/.bin/uglifyjs \
   bower_components/codemirror/mode/javascript/javascript.js \
   bower_components/codemirror/mode/css/css.js \
   bower_components/codemirror/mode/htmlmixed/htmlmixed.js \
-  src/javascript/commands.js \
+  src/javascript/continuelist.js \
   src/javascript/ninja.js \
   --mangle \
   --compress \
