@@ -150,6 +150,9 @@
     this.codemirror = new codeMirror.fromTextArea(ele, codeMirrorOptions);
     this.codemirror.on('change', fixCodeHighlight);
 
+    if (codeMirrorOptions.value)
+      findCodesAndAddClass(this.codemirror, 'ff-monospace');
+
     if (!this.options || (this.options && this.options.toolbar !== false)) {
       this.createToolbar(this.toolbar || initToolbar());
     }
@@ -697,9 +700,44 @@
     cm.replaceRange(text, lineStart, lineEnd);
   }
 
+  function findCodesAndAddClass(cm, className) {
+    var codeBreakLines = [];
+    cm.eachLine(function(line){
+      var isCodeBlock = line.text.indexOf('```') === 0;
+      if (!isCodeBlock) return;
+      var lineNumber = cm.getLineNumber(line);
+      codeBreakLines.push(lineNumber);
+    });
+    for (var i = 0; i < codeBreakLines.length; i++) {
+      (function(index){
+        if ((index + 1) % 2 === 0) return;
+        if (!codeBreakLines[index + 1]) return;
+
+        var codeStart = codeBreakLines[index];
+        var codeEnd = codeBreakLines[index + 1];
+        var codes = codeEnd - codeStart;
+
+        if (codes === 1) return;
+        
+        var count = codeStart + 1;
+        for (var i = 0; i < (codes - 1); i++) {
+          (function(i){
+            cm.addLineClass(count, 'text', className);
+            count ++;
+          })(codes[i]);
+        };
+      })(i);
+    };
+  }
+
   function fixCodeHighlight(cm) {
     var startPoint = cm.getCursor('start');
-    cm.addLineClass(startPoint.line, 'text', 'hahahhahah');
+    var token = cm.getTokenAt(startPoint);
+    var codeTypeList = ['variable', 'comment', 'formatting-code-block', 'property', 'number', 'tag']
+    if (!token.type) return;
+    var types = token.type.split(' ');
+    if (codeTypeList.indexOf(types[0]) > -1)
+      cm.addLineClass(startPoint.line, 'text', 'ff-monospace');
   }
 
   /*=============================================
