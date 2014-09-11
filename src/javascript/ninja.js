@@ -180,7 +180,7 @@
 
     for (var i = 0; i < items.length; i++) {
       (function(item) {
-        var el = createIcon(item, self.keyMaps);
+        var el = createIcon(item, self.keyMaps, self);
         self.tools[item.name || item] = el;
         bar.appendChild(el);
       })(items[i]);
@@ -287,7 +287,7 @@
   
   /**
   *
-  * Toggle Whatever you like
+  * Toggle whatever you like
   *
   * @status: enabled
   * @example
@@ -525,7 +525,7 @@
 
   /**
   *
-  * Draw something, and wrap current cursor inside.
+  * Draw something, and wrap current cursor.
   *
   * @example
   *   draw('link'); => [<cursor>](http://)
@@ -639,7 +639,7 @@
   /**
    * Create icon element for toolbar.
    */
-  function createIcon(item, defaultKeys) {
+  function createIcon(item, defaultKeys, self) {
     var isNotLink = typeof(item) === 'string';
     var name = item.name || item;
     var iconMap = {
@@ -915,43 +915,6 @@
       // view => model
       function onChange() {
         ctrl.$setViewValue(editor.codemirror.getValue());
-      }
-
-      // upload images and fill uri
-      function uploadAndDrawImage() {
-        var uploading = false;
-        var cm = editor.codemirror;
-        var stat = editor.getState(cm);
-        if (!validUploadConfigs) {
-          return editor.replaceSelection(cm, stat.image,
-            '![', '](http://)' // uri to be filled.
-          );
-        }
-        if (!document.getElementById('fileUpload')) {
-          var hiddenInputFile = document.createElement('input');
-          hiddenInputFile.id = 'fileUpload';
-          hiddenInputFile.type = 'file';
-          hiddenInputFile.name = 'file';
-          hiddenInputFile.style.display = 'none';
-          $(element).after(hiddenInputFile);
-        }
-        // trigger click
-        var inputButton = document.getElementById('fileUpload');
-        inputButton.click();
-        // begin upload
-        $(inputButton).on('change', function(eve) {
-          if (uploading) return;
-          uploading = true;
-          upyun.upload(attrs.formName || 'articleForm', function(err, response, image) {
-            uploading = false;
-            if (err) return console.error(err);
-            var uploadOk = image.code === 200 && image.message === 'ok';
-            if (!uploadOk) return;
-            editor.replaceSelection(cm, stat.image,
-              '![', '](' + image.absUrl + ')' // uri to be filled.
-            );
-          });
-        });
       }
     }
   }
