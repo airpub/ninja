@@ -1,4 +1,4 @@
-(function(Ninja, upyun, angular, jQuery) {
+(function(Ninja, angular, jQuery) {
   // if no Ninja lib, diable this ken.
   if (!Ninja)
     return;
@@ -19,7 +19,7 @@
   // this `editor` is a editor instance (when click)
   // or a `codemirror` instance (when press hotkey)
   function upload(editor) {
-    if (!upyun)
+    if (!window.upyun)
       throw new Error('Upload.init(); Upyun lib not found');
     if (!$) 
       throw new Error('Upload.init(); Selector (jQuery/angular.element) not found.');
@@ -37,7 +37,9 @@
       // lock status
       uploading = true;
 
-      upyun.upload(formName, function(err, response, image) {
+      window.upyun.upload(
+        formName, 
+        function(err, response, image) {
         // unlock status
         uploading = false;
 
@@ -58,13 +60,17 @@
     return false;
   }
 
-  function createHiddenInput(element) {
+  function createHiddenInput() {
+    var form = document.createElement('form');
     var input = document.createElement('input');
+    form.id = formName;
+    form.name = formName;
     input.id = inputId;
     input.type = 'file';
     input.name = 'file';
     input.style.display = 'none';
-    $(element).after(input);
+    $(form).append(input);
+    $('body').append(form);
   }
 
   function errorhandler(err) {
@@ -83,7 +89,6 @@
 
 })(
   window.ninja, 
-  window.upyun, 
   window.angular,
   window.jQuery
 );
