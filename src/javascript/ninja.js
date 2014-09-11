@@ -317,7 +317,23 @@
   };
   Ninja.prototype.inject = function() {
     return inject(this.codemirror, arguments);
-  }
+  };
+  Ninja.prototype.getValue = function() {
+    if (!this.codemirror) return null;
+    return this.codemirror.getValue.apply(this.codemirror, arguments);
+  };
+  Ninja.prototype.setValue = function() {
+    if (!this.codemirror) return null;
+    return this.codemirror.setValue.apply(this.codemirror, arguments);
+  };
+  Ninja.prototype.on = function() {
+    if (!this.codemirror) return null;
+    return this.codemirror.on.apply(this.codemirror, arguments);
+  };
+  Ninja.prototype.refresh = function() {
+    if (!this.codemirror) return null;
+    return this.codemirror.refresh();
+  };
 
   /*===============================================
   =            Editor's Static Methods            =
@@ -915,23 +931,23 @@
     function link(scope, element, attrs, ctrl) {
       // init editor
       window.editor = new ninja(angular.element(element));
-      editor.codemirror.on('change', onChange);
+      editor.on('change', updateModel);
 
       // model => view
       ctrl.$render = function() {
         if (!editor) return;
-        editor.codemirror.setValue(
+        editor.setValue(
           ctrl.$isEmpty(ctrl.$viewValue) ? '' : ctrl.$viewValue
         );
         // refesh content by force
         $timeout(function() {
-          editor.codemirror.refresh();
+          editor.refresh();
         }, 0);
       };
 
       // view => model
-      function onChange() {
-        ctrl.$setViewValue(editor.codemirror.getValue());
+      function updateModel() {
+        ctrl.$setViewValue(editor.getValue());
       }
     }
   }
