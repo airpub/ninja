@@ -46,11 +46,13 @@
   *   (new Ninja()).set('element', document.getElementById('my-ele'))
   *
   **/
-  Ninja.prototype.set = function set(key, value) {
+  Ninja.prototype.set = setAttr;
+
+  function setAttr(key, value) {
     if (key && value)
       this[key] = value;
     return this;
-  };
+  }
 
   /**
   *
@@ -61,7 +63,9 @@
   *   SET: (new Ninja()).key('bold', 'Cmd-Alt-B');
   *
   **/
-  Ninja.prototype.key = function key(key, value) {
+  Ninja.prototype.key = addKey;
+
+  function addKey(key, value) {
     if (!this.keyMaps)
       this.keyMaps = {};
     if (key && !value)
@@ -69,7 +73,7 @@
     if (key && value)
       this.keyMaps[key] = value;
     return this;
-  };
+  }
 
   /**
   *
@@ -79,7 +83,9 @@
   *   (new Ninja()).tool('customTool', function(){ console.log('new tool!') })
   *
   **/
-  Ninja.prototype.tool = function tool(name, metaString) {
+  Ninja.prototype.tool = addTool;
+
+  function addTool(name, metaString) {
     if (!name || typeof(name) !== 'string')
       return;
 
@@ -113,13 +119,40 @@
 
   /**
   *
+  * Try to find a tool's action function by its name
+  * @param {[String]} [name] [the name of this tool]
+  * @return {[Function|null]}
+  *
+  **/
+  function findTool(name) {
+    if (!Ninja) 
+      return;
+    if (!Ninja.toolbar || !Ninja.toolbar.length) 
+      return null;
+
+    var action = null;
+    for (var i = 0; i < Ninja.toolbar.length; i++) {
+      (function(index){
+        var item = Ninja.toolbar[index];
+        if (item && item.name && item.name === name && item.action)
+          action = item.action;
+      })(i)
+    };
+
+    return action;
+  }
+
+  /**
+  *
   * Renderer of Ninja editor
   *
   * @example
   *   (new Ninja()).render();
   *
   **/
-  Ninja.prototype.render = function render() {
+  Ninja.prototype.render = render;
+
+  function render() {
     var ele = this.element || document.getElementsByTagName('textarea')[0];
 
     if (!ele) 
@@ -127,7 +160,8 @@
     if (this._rendered && this._rendered === ele) 
       return;
 
-    this.keyMaps = initKeyMaps(this.keyMaps);
+    // extends builtin keymap
+    this.keyMaps = initKeyMaps(Ninja.keyMaps);
 
     var codeMirrorOptions = {
       theme: 'zen',
@@ -135,7 +169,7 @@
       lineNumbers: false,
       lineWrapping: true,
       autoCloseBrackets: true,
-      extraKeys: initKeyMaps(this.keyMaps),
+      extraKeys: this.keyMaps,
       mode: {
         name: 'markdown',
         underscoresBreakWords: false,
@@ -161,14 +195,16 @@
 
     this._rendered = ele;
     return this;
-  };
+  }
 
   /**
   *
   * Create a toolbar on top of the editor
   *
   **/
-  Ninja.prototype.createToolbar = function(items) {
+  Ninja.prototype.createToolbar = createToolbar;
+
+  function createToolbar(items) {
     if (!items || items.length === 0) return;
 
     var bar = document.createElement('div');
@@ -205,14 +241,16 @@
     cmWrapper.parentNode.insertBefore(bar, cmWrapper);
 
     return bar;
-  };
+  }
 
   /**
   *
   * Create a statusbar on bottom of the editor
   *
   **/  
-  Ninja.prototype.createStatusbar = function createStatusbar(status) {
+  Ninja.prototype.createStatusbar = createStatusbar;
+
+  function createStatusbar(status) {
     status = status || this.statusbar;
 
     if (!status || status.length === 0) return;
@@ -257,7 +295,7 @@
     var cmWrapper = this.codemirror.getWrapperElement();
     cmWrapper.parentNode.insertBefore(bar, cmWrapper.nextSibling);
     return bar;
-  };
+  }
   
   /**
   *
@@ -280,6 +318,14 @@
   Ninja.prototype.inject = function() {
     return inject(this.codemirror, arguments);
   }
+
+  /*===============================================
+  =            Editor's Static Methods            =
+  ===============================================*/  
+  
+  Ninja.key = addKey;
+  Ninja.tool = addTool;
+  Ninja.inject = inject; // needs to parse codemirror instance
 
   /*======================================
   =            Editor's Utils            =
@@ -678,9 +724,15 @@
 
     if (item.action) {
       el.onclick = function(eve) {
-        item.action(self, el, eve);
+        if (typeof(item.action) === 'function')
+          return item.action(self, el, eve);
+        // trying to find bind actions in Ninja Class
+        if (typeof(item.action) === 'string')
+          return findTool(item.action)(self, el, eve);
+        return;
       };
     }
+
     return el;
   }
 
@@ -777,9 +829,19 @@
       'Cmd-Alt-L': toggle('ordered-list'),
       'Enter': 'newlineAndIndentContinueMarkdownList'
     };
-    return formatKeyObject(customKeyMaps || defaultKeyMaps);
+    return formatKeys(extendKeys(defaultKeyMaps, customKeyMaps));
 
-    function formatKeyObject(obj) {
+    // TODO: use `copy` instead of &.
+    function extendKeys(defaults, customs) {
+      if (!customs)
+        return defaults;
+      for (var key in customs) {
+        defaults[customs[key]] = findTool(key); // find the real function
+      }
+      return defaults;
+    }
+
+    function formatKeys(obj) {
       var isMac = /Mac/.test(navigator.platform);
       for (var key in obj) {
         (function(key) {
@@ -807,7 +869,7 @@
   **/
   function initToolbar(customToolbar, cm) {
     var defaultToolbar = [
-      {name: 'bold', action: trigger(toggle,'bold', cm)},
+      {name: 'bold', action: trigger(toggle, 'bold', cm)},
       {name: 'italic', action: trigger(toggle,'italic', cm)},
       '|',
       {name: 'quote', action: trigger(toggle,'quote', cm)},
@@ -816,7 +878,7 @@
       '|',
       {name: 'link', action: trigger(draw,'link', cm)},
       {name: 'image', action: trigger(draw,'image', cm)},
-      {name: 'upload', action: trigger(draw,'upload-image', cm)},
+      {name: 'upload', action: 'upload'}, // bind exist addon
       {name: 'fullscreen', action: trigger(toggle,'fullscreen', cm)}
     ];
     return customToolbar || defaultToolbar;

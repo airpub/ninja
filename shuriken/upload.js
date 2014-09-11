@@ -16,8 +16,9 @@
   if (jQuery)
     $ = jQuery;
 
-  // this `editor` is a editor instance.
-  function upload(editor, element, eve) {
+  // this `editor` is a editor instance (when click)
+  // or a `codemirror` instance (when press hotkey)
+  function upload(editor) {
     if (!upyun)
       throw new Error('Upload.init(); Upyun lib not found');
     if (!$) 
@@ -46,11 +47,15 @@
           return errorhandler(image);
 
         // inject abs uri to current cursor
-        editor.inject(
-          '![', '](' + image.absUrl + ')'
-        );
+        // TODO: remove this ugly hack.
+        if (editor.inject)
+          editor.inject('![', '](' + image.absUrl + ')');
+        else
+          Ninja.inject(editor, '![', '](' + image.absUrl + ')');
       });
     });
+
+    return false;
   }
 
   function createHiddenInput(element) {

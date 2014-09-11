@@ -29,5 +29,8 @@
     "codemirror": "4.5.0",
     "fontawesome": "~4.2.0",
     "upyun": "~0.3.0"
+  },
+  "devDependencies": {
+    "jquery": "~2.1.1"
   }
 }
