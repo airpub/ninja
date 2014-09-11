@@ -16,20 +16,30 @@
   <script src="../bower_components/codemirror/addon/edit/closebrackets.js"></script>
   <script src="../src/javascript/ninja.js"></script>
   <style>
+    *,body {
+      margin: 0px;
+      padding: 0px;
+    }
     body {
       background-color: #f5f5f5;
     }
     .wrapper {
-      margin-top: 30px;
-      width: 800px;
       margin-left: auto;
       margin-right: auto;
       background-color: #f5f5f5;
+    }
+    .editor .editor-toolbar {
+      border-bottom: 1px solid #ddd;
+      background-color: #fff;
+    }
+    .editor .cm-s-zen {
+      padding: 15px;
     }
   </style>
 </head>
 <body>
   <div id="wrapper" class="wrapper">
+  <div class="editor">
   <textarea name="editor" id="editor" cols="30" rows="10">
 Everything from markdown plus GFM features:
 
@@ -98,6 +108,7 @@ normal:
 
 See http://github.github.com/github-flavored-markdown/.
   </textarea>
+  </div>
   </div>
   <script>
     new ninja(document.getElementById('editor'));

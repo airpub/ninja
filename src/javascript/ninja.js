@@ -7,22 +7,20 @@
   /*===============================================
   =            Bootstrap main function            =
   ===============================================*/ 
-  (function(fn) {
-    if (typeof exports == "object" && typeof module == "object") // CommonJS
+  (function(fn, provider, directive) {
+    if (typeof exports == "object" && typeof module == "object") {// CommonJS
       module.exports = fn;
-    else if (typeof define == "function" && define.amd) // AMD
+    } else if (typeof define == "function" && define.amd) { // AMD 
       return define([], fn);
-    else if (angular) // Angular.js
+    } else if (angular) { // Angular.js 
       angular
         .module('ninja', ['upyun'])
-        .service('ninja', ninja)
-        .directive('ninja', [
-          'ninja','$upyun', '$timeout', 
-          ninjaDirective]
-        );
-    else
+        .provider('ninja', ['upyunProvider', provider])
+        .directive('ninja', ['ninja', 'upyun', '$timeout', directive]);
+    } else {
       window.ninja = fn;
-  })(Ninja);
+    }
+  })(Ninja, ninjaProvider, ninjaDirective);
 
   /*====================================
   =            Editor Ninja            =
@@ -59,11 +57,11 @@
   * Set/Get a key-value pair to instance.keyMap
   *
   * @example
-  *   GET: (new Ninja()).shortcut('bold');
-  *   SET: (new Ninja()).shortcut('bold', 'Cmd-Alt-B');
+  *   GET: (new Ninja()).key('bold');
+  *   SET: (new Ninja()).key('bold', 'Cmd-Alt-B');
   *
   **/
-  Ninja.prototype.shortcut = function shortcut(key, value) {
+  Ninja.prototype.key = function key(key, value) {
     if (!this.keyMaps)
       this.keyMaps = {};
     if (key && !value)
@@ -125,25 +123,26 @@
     var ele = this.element || document.getElementsByTagName('textarea')[0];
 
     if (!ele) 
-      throw new Error('ninja.render(); ninja requires a vaild element to render');
+      throw new Error('Ninja.render(); ninja requires a vaild element to render');
     if (this._rendered && this._rendered === ele) 
       return;
 
     this.keyMaps = initKeyMaps(this.keyMaps);
-    var codeMirrorOptions = {};
-    codeMirrorOptions.mode = {
-      name: 'markdown',
-      underscoresBreakWords: false,
-      taskLists: true,
-      fencedCodeBlocks: true
-      // highlightFormatting: true
+
+    var codeMirrorOptions = {
+      theme: 'zen',
+      tabSize: 2,
+      lineNumbers: false,
+      lineWrapping: true,
+      autoCloseBrackets: true,
+      extraKeys: initKeyMaps(this.keyMaps),
+      mode: {
+        name: 'markdown',
+        underscoresBreakWords: false,
+        taskLists: true,
+        fencedCodeBlocks: true
+      }
     };
-    codeMirrorOptions.theme = 'zen';
-    codeMirrorOptions.tabSize = 2;
-    codeMirrorOptions.lineNumbers = false;
-    codeMirrorOptions.lineWrapping = true;
-    codeMirrorOptions.autoCloseBrackets = true;
-    codeMirrorOptions.extraKeys = initKeyMaps(this.keyMaps);
 
     if (ele.value !== '') 
       codeMirrorOptions.value = ele.value;
@@ -154,9 +153,9 @@
     if (codeMirrorOptions.value)
       findCodesAndAddClass(this.codemirror, 'ff-monospace');
 
-    if (!this.options || (this.options && this.options.toolbar !== false)) {
+    if (!this.options || (this.options && this.options.toolbar !== false))
       this.createToolbar(this.toolbar || initToolbar(null, this.codemirror));
-    }
+
     if (!this.options || (this.options && this.options.statusbar !== false)) 
       this.createStatusbar();
 
@@ -176,7 +175,6 @@
     bar.className = 'editor-toolbar';
 
     var self = this;
-
     var el;
     self.tools = {};
 
@@ -192,21 +190,20 @@
     var cm = this.codemirror;
     cm.on('cursorActivity', function() {
       var stat = getState(cm);
-
       for (var key in self.tools) {
         (function(key) {
           var el = self.tools[key];
-          if (stat[key]) {
+          if (stat[key])
             el.className += ' active';
-          } else {
+          else
             el.className = el.className.replace(/\s*active\s*/g, '');
-          }
         })(key);
       }
     });
 
     var cmWrapper = cm.getWrapperElement();
     cmWrapper.parentNode.insertBefore(bar, cmWrapper);
+
     return bar;
   };
 
@@ -681,7 +678,6 @@
 
     if (item.action) {
       el.onclick = function(eve) {
-        console.log(item.action);
         item.action(self, el, eve);
       };
     }
@@ -832,11 +828,21 @@
     }
   }
 
+  /*================================
+  =            Provider            =
+  ================================*/  
+
+  function ninjaProvider(upyunProvider) {
+    this.$get = function() {
+      return new Ninja();
+    }
+  }
+
   /*=============================================
   =               Directives                    =
   =============================================*/  
 
-  function ninjaDirective(ninja, $upyun, $timeout) {
+  function ninjaDirective(ninja, upyun, $timeout) {
     var directive = {
       restrict: 'AE',
       require: 'ngModel',
@@ -846,7 +852,7 @@
 
     function link(scope, element, attrs, ctrl) {
       var $ = angular.element;
-      var validUploadConfigs = $upyun && (airpubConfigs.upyun || airpubConfigs.qiniu);
+      var validUploadConfigs = upyun && (airpubConfigs.upyun || airpubConfigs.qiniu);
       // add class
       $(element).addClass('editor');
       // check if lepture's editor class exists
@@ -890,8 +896,8 @@
 
       // upyun configs
       if (validUploadConfigs) {
-        $upyun.set('bucket', airpubConfigs.upyun.bucket);
-        $upyun.set('form_api_secret', airpubConfigs.upyun.form_api_secret);
+        upyun.set('bucket', airpubConfigs.upyun.bucket);
+        upyun.set('form_api_secret', airpubConfigs.upyun.form_api_secret);
       }
 
       // model => view
@@ -936,7 +942,7 @@
         $(inputButton).on('change', function(eve) {
           if (uploading) return;
           uploading = true;
-          $upyun.upload(attrs.formName || 'articleForm', function(err, response, image) {
+          upyun.upload(attrs.formName || 'articleForm', function(err, response, image) {
             uploading = false;
             if (err) return console.error(err);
             var uploadOk = image.code === 200 && image.message === 'ok';
