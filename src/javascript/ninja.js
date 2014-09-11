@@ -851,54 +851,9 @@
     return directive;
 
     function link(scope, element, attrs, ctrl) {
-      var $ = angular.element;
-      var validUploadConfigs = upyun && (airpubConfigs.upyun || airpubConfigs.qiniu);
-      // add class
-      $(element).addClass('editor');
-      // check if lepture's editor class exists
-      if (!window.Editor) return false;
-      // init editor instance
-      window.editor = new Editor({
-        toolbar: [{
-            name: 'bold',
-            action: Editor.toggleBold
-          }, {
-            name: 'italic',
-            action: Editor.toggleItalic
-          },
-          '|', {
-            name: 'quote',
-            action: Editor.toggleBlockquote
-          }, {
-            name: 'unordered-list',
-            action: Editor.toggleUnOrderedList
-          }, {
-            name: 'ordered-list',
-            action: Editor.toggleOrderedList
-          },
-          '|', {
-            name: 'link',
-            action: Editor.drawLink
-          }, {
-            name: 'image',
-            action: Editor.drawImage
-          }, {
-            name: 'upload',
-            action: uploadAndDrawImage
-          }, {
-            name: 'fullscreen',
-            action: Editor.toggleFullScreen
-          }
-        ]
-      });
-      editor.render();
+      // init editor
+      window.editor = new ninja(angular.element(element));
       editor.codemirror.on('change', onChange);
-
-      // upyun configs
-      if (validUploadConfigs) {
-        upyun.set('bucket', airpubConfigs.upyun.bucket);
-        upyun.set('form_api_secret', airpubConfigs.upyun.form_api_secret);
-      }
 
       // model => view
       ctrl.$render = function() {
