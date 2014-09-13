@@ -12,13 +12,14 @@
       module.exports = fn;
     } else if (typeof define == "function" && define.amd) { // AMD 
       return define([], fn);
-    } else if (angular) { // Angular.js 
+    }
+    if (angular) { // Angular.js 
       angular
         .module('ninja', [])
         .directive('ninja', ['$timeout', directive]);
-    } else {
-      window.ninja = fn;
     }
+    if (window)
+      window.ninja = fn;
   })(Ninja, ninjaDirective);
 
   /*====================================

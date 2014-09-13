@@ -32,20 +32,20 @@
   </div>
   <script>
     angular
-      .module('app', ['ninja'])
+      .module('app', ['ninja', 'ninja.upload'])
+      .config(['ninjaUploadProvider', function(ninjaUploadProvider) {
+        // just for demo !, this bucket has a upload limit
+        ninjaUploadProvider.config('upyun', {
+          bucket: 'upyun-form',
+          form_api_secret: 'IRoTyNc75husfQD24cq0bNmRSDI='
+        });
+      }])
       .controller('article', ['$scope', function($scope){
         $scope.content = '### H1\n\n```html\n<ninja ng-model="content" ng-change="updateContent();" class="ng-pristine ng-valid" style="display: none;">\n\t<textarea></textarea>\n</ninja>\n```';
         $scope.updateContent = function() {
           console.log($scope.content);
         };
       }]);
-      // .config(['ninjaUploadProvider', function(ninjaUploadProvider) {
-      //   // just for demo !, this bucket has a upload limit
-      //   ninjaUploadProvider.config('upyun', {
-      //     bucket: 'upyun-form',
-      //     form_api_secret: 'IRoTyNc75husfQD24cq0bNmRSDI='
-      //   });
-      // }]);
   </script>
 </body>
 </html>

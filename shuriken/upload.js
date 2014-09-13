@@ -1,12 +1,34 @@
 (function(Ninja, angular, jQuery) {
-  // if no Ninja lib, diable this ken.
-  if (!Ninja)
-    return;
+  if (!Ninja) return;
+  var upyunModule;
 
   Ninja
-    .tool('upload', createButton, upload) // bind upload function when clicked.
-    .key('upload', 'Cmd-Alt-U'); // bind alias to hotkey.
-    
+    // bind upload function when clicked.
+    .tool('upload', createButton(), upload)
+    // bind alias to hotkey.
+    .key('upload', 'Cmd-Alt-U');
+
+  if (angular) {
+    if (!angular.module('upyun'))
+      throw new Error('Upload.init(); Upyun lib not found');
+
+    angular
+      .module('ninja.upload', ['upyun'])
+      .provider('ninjaUpload', ['upyunProvider', function(upyunProvider) {
+        var typeMap = {
+          upyun: upyunProvider
+        };
+        this.config = function(type, configs) {
+          if (!typeMap[type]) return;
+          typeMap[type].config(configs);
+        };
+        this.$get = function() {};
+      }])
+      .run(['upyun', function(upyun){
+        upyunModule = upyun;
+      }])
+  }
+
   var $;
   var inputId = 'imageUpload';
   var formName = 'imageUploadForm';
@@ -19,12 +41,14 @@
   // this `editor` is a editor instance (when click)
   // or a `codemirror` instance (when press hotkey)
   function upload(editor) {
-    if (!window.upyun)
-      throw new Error('Upload.init(); Upyun lib not found');
     if (!$) 
       throw new Error('Upload.init(); Selector (jQuery/angular.element) not found.');
 
+    var upyun = window.upyun || upyunModule;
     var uploading = false;
+
+    if (!upyun)
+      throw new Error('Upload.init(); ninja.upload configs missing');
 
     if (!document.getElementById(inputId))
       createHiddenInput();
@@ -37,7 +61,7 @@
       // lock status
       uploading = true;
 
-      window.upyun.upload(
+      upyun.upload(
         formName, 
         function(err, response, image) {
         // unlock status
@@ -69,8 +93,8 @@
     input.type = 'file';
     input.name = 'file';
     input.style.display = 'none';
-    $(form).append(input);
-    $('body').append(form);
+    form.appendChild(input);
+    document.body.appendChild(form);
   }
 
   function errorhandler(err) {
