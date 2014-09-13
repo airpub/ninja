@@ -18,41 +18,34 @@
   <script src="../bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
   <script src="../bower_components/codemirror/addon/edit/continuelist.js"></script>
   <script src="../bower_components/codemirror/addon/edit/closebrackets.js"></script>
-  <script src="../src/ninja.js"></script>
   <!-- editor ninja -->
   <script src="../src/javascript/ninja.js"></script>
   <!-- ninja shuriken (addons) -->
-  <script src="../bower_components/js-base64/base64.min.js"></script>
-  <script src="../bower_components/js-md5/js/md5.min.js"></script>
+  <script src="../bower_components/angular-base64/angular-base64.min.js"></script>
+  <script src="../bower_components/angular-md5/angular-md5.min.js"></script>
   <script src="../bower_components/upyun/dist/upyun.min.js"></script>
   <script src="../shuriken/upload.js"></script>
 </head>
-<body>
-  <textarea name="editor" id="editor" cols="30" rows="10">123</textarea>
+<body ng-app="app">
+  <div class="wrapper" ng-controller="article">
+    <ninja ng-model="content" ng-change="updateContent();"></ninja>
+  </div>
   <script>
-    (function(){
-      window.editor = new ninja();
-      
-      editor
-        .tool('custom', toolAction)
-        .tool('mysite', 'http://airpub.io')
-        .tool('|')
-        .tool('inject', injectText)
-        .tool('inject-custom-html', '<span class="haha">customHtml<i class="fa fa-home"></i></span>', bindclick)
-        .render();
-
-      function toolAction(editor) {
-        alert('just clicked!');
-      }
-
-      function injectText(editor) {
-        return editor.inject('you have been hacked!');
-      }
-
-      function bindclick(editor, el) {
-        return editor.inject(el.innerHtml);
-      }
-    })();
+    angular
+      .module('app', ['ninja'])
+      .controller('article', ['$scope', function($scope){
+        $scope.content = '### H1\n\n```html\n<ninja ng-model="content" ng-change="updateContent();" class="ng-pristine ng-valid" style="display: none;">\n\t<textarea></textarea>\n</ninja>\n```';
+        $scope.updateContent = function() {
+          console.log($scope.content);
+        };
+      }]);
+      // .config(['ninjaUploadProvider', function(ninjaUploadProvider) {
+      //   // just for demo !, this bucket has a upload limit
+      //   ninjaUploadProvider.config('upyun', {
+      //     bucket: 'upyun-form',
+      //     form_api_secret: 'IRoTyNc75husfQD24cq0bNmRSDI='
+      //   });
+      // }]);
   </script>
 </body>
 </html>

@@ -7,20 +7,19 @@
   /*===============================================
   =            Bootstrap main function            =
   ===============================================*/ 
-  (function(fn, provider, directive) {
+  (function(fn, directive) {
     if (typeof exports == "object" && typeof module == "object") {// CommonJS
       module.exports = fn;
     } else if (typeof define == "function" && define.amd) { // AMD 
       return define([], fn);
     } else if (angular) { // Angular.js 
       angular
-        .module('ninja', ['upyun'])
-        .provider('ninja', ['upyunProvider', provider])
-        .directive('ninja', ['ninja', 'upyun', '$timeout', directive]);
+        .module('ninja', [])
+        .directive('ninja', ['$timeout', directive]);
     } else {
       window.ninja = fn;
     }
-  })(Ninja, ninjaProvider, ninjaDirective);
+  })(Ninja, ninjaDirective);
 
   /*====================================
   =            Editor Ninja            =
@@ -909,36 +908,37 @@
     }
   }
 
-  /*================================
-  =            Provider            =
-  ================================*/  
-
-  function ninjaProvider(upyunProvider) {
-    this.$get = function() {
-      return new Ninja();
-    }
-  }
-
   /*=============================================
   =               Directives                    =
   =============================================*/  
 
-  function ninjaDirective(ninja, upyun, $timeout) {
+  function ninjaDirective($timeout) {
     var directive = {
       restrict: 'AE',
       require: 'ngModel',
+      template: '<textarea></textarea>',
+      replace: true,
       link: link
     };
     return directive;
 
     function link(scope, element, attrs, ctrl) {
+      if (!element.length)
+        return;
+
       // init editor
-      window.editor = new ninja(angular.element(element));
+      var editor = new Ninja(element[0]);
+
+      // sync data
       editor.on('change', updateModel);
+      ctrl.$render();
+      
+      window.editor = editor;
 
       // model => view
       ctrl.$render = function() {
-        if (!editor) return;
+        if (!editor) 
+          return;
         editor.setValue(
           ctrl.$isEmpty(ctrl.$viewValue) ? '' : ctrl.$viewValue
         );
