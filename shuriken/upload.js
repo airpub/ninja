@@ -5,8 +5,8 @@
 
   Ninja
     .tool('upload', createButton, upload) // bind upload function when clicked.
-    .key('upload','Cmd-Alt-U'); // bind alias to hotkey.
-
+    .key('upload', 'Cmd-Alt-U'); // bind alias to hotkey.
+    
   var $;
   var inputId = 'imageUpload';
   var formName = 'imageUploadForm';

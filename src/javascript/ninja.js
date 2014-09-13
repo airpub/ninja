@@ -129,16 +129,16 @@
     if (!Ninja.toolbar || !Ninja.toolbar.length) 
       return null;
 
-    var action = null;
+    var tool = null;
     for (var i = 0; i < Ninja.toolbar.length; i++) {
       (function(index){
         var item = Ninja.toolbar[index];
-        if (item && item.name && item.name === name && item.action)
-          action = item.action;
+        if (item && item.name && item.name === name)
+          tool = item;
       })(i)
     };
 
-    return action;
+    return tool;
   }
 
   /**
@@ -215,7 +215,9 @@
 
     for (var i = 0; i < items.length; i++) {
       (function(item) {
-        var el = createIcon(item, self.keyMaps, self);
+        var el = createIcon(item, self);
+        // if element is invalid
+        if (!el) return;
         self.tools[item.name || item] = el;
         bar.appendChild(el);
       })(items[i]);
@@ -703,28 +705,36 @@
   /**
    * Create icon element for toolbar.
    */
-  function createIcon(item, defaultKeys, self) {
+  function createIcon(item, self) {
     var isNotLink = typeof(item) === 'string';
+    var isKen = item.type && item.type === 'ken';
     var name = item.name || item;
+    var defaultKeys = createDefaultKeyMap();
     var iconMap = {
       'quote': 'quote-left',
       'ordered-list':'list-ol',
       'unordered-list': 'list',
-      'upload': 'cloud-upload',
       'fullscreen': 'expand'
     };
+
+    if (isKen) {
+      item = findTool(item.name);
+      if (!item) return;
+    }
 
     if (isNotLink) {
       var sep = document.createElement('i');
       sep.className = 'separator';
-      // sep.innerHTML = name;
       return sep;
     }
 
     var el = document.createElement('a');
 
-    if (defaultKeys[name]) {
-      el.title = defaultKeys[name];
+    if (defaultKeys[name])
+      item.title = defaultKeys[name];
+
+    if (item.title) {
+      el.title = item.title;
       el.title = el.title.replace('Cmd', '⌘');
       if (/Mac/.test(navigator.platform))
         el.title = el.title.replace('Alt', '⌥');
@@ -738,15 +748,12 @@
     if (item.html) 
       el.innerHTML = item.html;
 
-    el.className += item.class || (iconMap[name] ? 'fa fa-' + iconMap[name] : 'fa fa-' + name);
+    el.className += item.class || ('fa fa-' + (iconMap[name] || name));
 
     if (item.action) {
       el.onclick = function(eve) {
         if (typeof(item.action) === 'function')
           return item.action(self, el, eve);
-        // trying to find bind actions in Ninja Class
-        if (typeof(item.action) === 'string')
-          return findTool(item.action)(self, el, eve);
         return;
       };
     }
@@ -837,24 +844,34 @@
   *
   **/
   function initKeyMaps(customKeyMaps) {
-    var defaultKeyMaps = {
-      'Cmd-K': draw('link'),
-      'Cmd-Alt-I': draw('image'),
-      'Cmd-B': toggle('bold'),
-      'Cmd-I': toggle('italic'),
-      "Cmd-'": toggle('quote'),
-      'Cmd-L': toggle('unordered-list'),
-      'Cmd-Alt-L': toggle('ordered-list'),
-      'Enter': 'newlineAndIndentContinueMarkdownList'
-    };
-    return formatKeys(extendKeys(defaultKeyMaps, customKeyMaps));
+
+    var defaultKeyMap = createDefaultKeyMap();
+    var keyFunctionMap = createFunctionMap(defaultKeyMap);
+
+    return formatKeys(extendKeys(keyFunctionMap, customKeyMaps));
+
+    function createFunctionMap(obj) {
+      var fns = {};
+      for (var key in obj) {
+        var shortcut = obj[key];
+        if (['link','image'].indexOf(key) > -1)
+          fns[shortcut] = draw(key);
+        else if (['bold', 'italic', 'quote', 'unordered-list', 'ordered-list'].indexOf(key) > -1)
+          fns[shortcut] = toggle(key);
+        else
+          fns[shortcut] = key;
+      }
+      return fns;
+    }
 
     // TODO: use `copy` instead of &.
     function extendKeys(defaults, customs) {
       if (!customs)
         return defaults;
       for (var key in customs) {
-        defaults[customs[key]] = findTool(key); // find the real function
+        var tool = findTool(key);
+        if (tool)
+          defaults[customs[key]] = tool.action; // find the real function
       }
       return defaults;
     }
@@ -878,6 +895,19 @@
     }
   }
 
+  function createDefaultKeyMap() {
+    return {
+      'link': 'Cmd-K',
+      'image': 'Cmd-Alt-I',
+      'bold': 'Cmd-B',
+      'italic': 'Cmd-I',
+      'quote': "Cmd-'",
+      'unordered-list': 'Cmd-L',
+      'ordered-list': 'Cmd-Alt-L',
+      'newlineAndIndentContinueMarkdownList': 'Enter'
+    }
+  }
+
   /**
   *
   * Init default Toolbar
@@ -896,7 +926,7 @@
       '|',
       {name: 'link', action: trigger(draw,'link', cm)},
       {name: 'image', action: trigger(draw,'image', cm)},
-      {name: 'upload', action: 'upload'}, // bind exist addon
+      {name: 'upload', type: 'ken'}, // bind exist addon
       {name: 'fullscreen', action: trigger(toggle,'fullscreen', cm)}
     ];
     return customToolbar || defaultToolbar;
@@ -932,7 +962,7 @@
       // sync data
       editor.on('change', updateModel);
       ctrl.$render();
-      
+
       window.editor = editor;
 
       // model => view
