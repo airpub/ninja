@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build": "bin/build.sh",
-    "build-docs": "node_modules/.bin/jsdoc src/ninja.js --destination docs",
     "build-less": "node_modules/.bin/lessc -x src/less/ninja.less dist/ninja.min.css",
     "watch-less": "node_modules/.bin/rewatch src/**/*.less -c 'npm run build-less'",
     "serve": "node_modules/.bin/serve --no-less .",

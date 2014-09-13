@@ -417,7 +417,7 @@
           var olderTypes = Object.keys(stat);
           var hasTypeBefore = olderTypes.length > 0 && type !== olderTypes[0];
 
-          if (hasTypeBefore)
+          if (hasTypeBefore && styleMap[olderTypes[0]])
             text = text.replace(styleMap[olderTypes[0]].re, '$1');
 
           if (stat[type]) {
@@ -652,8 +652,10 @@
         break;
         case 'em':
           ret.italic = true;
+        break;
         case 'link':
           ret.link = true;
+        break;
         case 'variable-2':
           text = cm.getLine(pos.line);
           if (/^\s*\d+\.\s/.test(text))
@@ -665,6 +667,7 @@
         break;
       }
     }
+
     return ret;
   }
 
