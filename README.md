@@ -22,6 +22,17 @@ inspired by lepture's [editor](https://github.com/lepture/editor).
 ```bash
 $ bower install ninja --save
 ```
+Or use NPM instead of `bower`:
+```bash
+$ npm install editor-ninja --save
+```
+
+Then, link these files into your HTML:
+
+```html
+<link rel="stylesheet" href="dist/ninja.min.css">
+<script src="dist/ninja.min.js"></script>
+```
 
 ### Basic Example
 
