@@ -32,10 +32,10 @@
   </div>
   <script>
     angular
-      .module('app', ['ninja', 'ninja.upload'])
-      .config(['ninjaUploadProvider', function(ninjaUploadProvider) {
+      .module('app', ['EditorNinja', 'EditorNinja.upload'])
+      .config(['EditorNinjaUploadProvider', function(upload) {
         // just for demo !, this bucket has a upload limit
-        ninjaUploadProvider.config('upyun', {
+        upload.config('upyun', {
           bucket: 'upyun-form',
           form_api_secret: 'IRoTyNc75husfQD24cq0bNmRSDI='
         });

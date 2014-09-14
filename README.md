@@ -1,6 +1,6 @@
 ![editor-ninja](./editor-ninja.jpg)
 
-## Editor Ninja
+## Editor Ninja ![release](http://img.shields.io/github/release/airpub/ninja.svg?style=flat)&nbsp;![npm](http://img.shields.io/npm/v/editor-ninja.svg?style=flat)
 
 a hackable Markdown editor based on [CodeMirror](http://codemirror.net/). 
 inspired by lepture's [editor](https://github.com/lepture/editor). 
@@ -75,10 +75,10 @@ function bindClick(editor) {
 
 ```js
 angular
-  .module('app', ['ninja', 'ninja.upload'])
-  .config(['ninjaUploadProvider', function(ninjaUploadProvider) {
+  .module('app', ['EditorNinja', 'EditorNinja.upload'])
+  .config(['EditorNinjaUploadProvider', function(upload) {
     // config upload buckct
-    ninjaUploadProvider.config('upyun', {
+    upload.config('upyun', {
       bucket: 'xxx',
       form_api_secret: 'xxxxxxx'
     });

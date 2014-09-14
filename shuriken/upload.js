@@ -10,11 +10,11 @@
 
   if (angular) {
     if (!angular.module('upyun'))
-      throw new Error('Upload.init(); Upyun lib not found');
+      throw new Error('EditorNinjaUpload.init(); Upyun lib not found');
 
     angular
-      .module('ninja.upload', ['upyun'])
-      .provider('ninjaUpload', ['upyunProvider', function(upyunProvider) {
+      .module('EditorNinja.upload', ['upyun'])
+      .provider('EditorNinjaUpload', ['upyunProvider', function(upyunProvider) {
         var typeMap = {
           upyun: upyunProvider
         };

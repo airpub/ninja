@@ -15,7 +15,7 @@
     }
     if (angular) { // Angular.js 
       angular
-        .module('ninja', [])
+        .module('EditorNinja', [])
         .directive('editorNinja', ['$timeout', directive]);
     }
     if (window)
