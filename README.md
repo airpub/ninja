@@ -14,7 +14,8 @@ inspired by lepture's [editor](https://github.com/lepture/editor).
 - [x] Supports Markdown and GFM
 - [x] Flexible and expandable
 - [x] Supports Angular.js directive
-- [x] Built-in upload addon
+- [x] Supports real time highlight in Markdown code block
+- [x] Built-in image upload addon
 - [x] Easy-to-use API
 
 ### Installation
