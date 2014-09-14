@@ -6,3 +6,5 @@ thumb
 *.log
 bower_*
 dist/codemirror.*
+screenshot.png
+editor-ninja.jpg

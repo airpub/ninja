@@ -23,7 +23,10 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "screenshot.png",
+    "editor-ninja.jpg",
+    "thumb"
   ],
   "dependencies": {
     "codemirror": "4.5.0",
