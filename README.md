@@ -25,10 +25,6 @@ $ bower install ninja --save
 ```html
 <textarea id="editor">
   Texts...
-
-  ```js
-  var a = 'I am a var';
-  ```
 </textarea>
 ```
 
