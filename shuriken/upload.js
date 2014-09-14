@@ -112,7 +112,7 @@
   }
 
 })(
-  window.ninja, 
+  window.EditorNinja, 
   window.angular,
   window.jQuery
 );

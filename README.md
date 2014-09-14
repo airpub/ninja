@@ -1,13 +1,95 @@
-## Editor Ninja (WIP)
+![editor-ninja](./editor-ninja.jpg)
 
-Still Work in process.
+## Editor Ninja
 
-a hackable Markdown editor. inspired by letpture's [editor](https://github.com/lepture/editor).
+a hackable Markdown editor based on [CodeMirror](http://codemirror.net/). 
+inspired by lepture's [editor](https://github.com/lepture/editor). 
+
+### Features
+
+- [x] Supports Markdown and GFM
+- [x] Flexible and expandable
+- [x] Supports Angular.js directive
+- [x] Built-in upload addon
+- [x] Easy-to-use API
 
 ### Installation
-````
+```bash
 $ bower install ninja --save
-````
+```
+
+### Basic Example
+
+#### HTML Part:
+
+```html
+<textarea id="editor">
+  Texts...
+
+  ```js
+  var a = 'I am a var';
+  ```
+</textarea>
+```
+
+#### Javascript Part 
+
+basic useage:
+
+```js
+new EditorNinja(document.getElementById('editor'));
+```
+
+advanced useage:
+
+```js
+var editor = new EditorNinja();
+
+editor
+  .tool('custom', bindClick)
+  .tool(
+    'inject-custom-html', 
+    '<span class="style-class">' +
+      'customHtml' + 
+      '<i class="fa fa-home"></i>' +
+    '</span>', 
+    bindClick
+  )
+  .render();
+
+function bindClick(editor) {
+  console.log('just clicked!');
+  // inject texts
+  editor.inject('you have been hacked!');
+}
+```
+
+### Angular.js Example
+
+#### HTML Part:
+
+```html
+<body ng-app="app">
+  <div ng-controller="article">
+    <editor-ninja ng-model="content"></editor-ninja>
+  </div>
+</body>
+```
+
+```js
+angular
+  .module('app', ['ninja', 'ninja.upload'])
+  .config(['ninjaUploadProvider', function(ninjaUploadProvider) {
+    // config upload buckct
+    ninjaUploadProvider.config('upyun', {
+      bucket: 'xxx',
+      form_api_secret: 'xxxxxxx'
+    });
+  }])
+  .controller('article', ['$scope', function($scope){
+    $scope.content = 'texts';
+  }]);
+```
 
 ### Contributing
 - Fork this repo

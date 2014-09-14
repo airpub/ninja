@@ -2,7 +2,7 @@
   'use strict';
 
   if (!codeMirror) 
-    throw new Error('Ninja.init(); CodeMirror is required.');
+    throw new Error('EditorNinja.init(); CodeMirror is required.');
 
   /*===============================================
   =            Bootstrap main function            =
@@ -16,10 +16,10 @@
     if (angular) { // Angular.js 
       angular
         .module('ninja', [])
-        .directive('ninja', ['$timeout', directive]);
+        .directive('editorNinja', ['$timeout', directive]);
     }
     if (window)
-      window.ninja = fn;
+      window.EditorNinja = fn;
   })(Ninja, ninjaDirective);
 
   /*====================================
