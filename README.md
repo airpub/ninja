@@ -71,6 +71,7 @@ function bindClick(editor) {
   </div>
 </body>
 ```
+#### Angular.js Part:
 
 ```js
 angular
