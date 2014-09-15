@@ -5,8 +5,9 @@
   "main": "dist.ninja.min.js",
   "scripts": {
     "build-js": "bin/build.sh",
-    "build-css-core": "bin/build-css.sh",
+    "build-css-core": "bin/build-css-core.sh",
     "build-css-bundle": "bin/build-css-bundle.sh",
+    "build-css-cm": "bin/build-css-cm.sh",
     "build-css": "npm run build-css-core && npm run build-css-bundle",
     "build-less": "node_modules/.bin/lessc -x src/less/ninja.less dist/ninja.css",
     "watch-less": "node_modules/.bin/rewatch src/**/*.less -c 'npm run build-less'",
@@ -39,6 +40,6 @@
     "less": "~1.7.3",
     "uglify-js": "^2.4.15",
     "rewatch": "~0.2.2",
-    "clean-css": "~2.2.13"
+    "concat-bin": "^1.0.1"
   }
 }

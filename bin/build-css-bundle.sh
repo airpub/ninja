@@ -1,10 +1,8 @@
 #!/bin/bash
 
 # compile stand-alone bundle css with `font-awesome` lib
-node_modules/.bin/cleancss \
+node_modules/.bin/concat \
   bower_components/fontawesome/css/font-awesome.min.css \
-  bower_components/codemirror/lib/codemirror.css \
+  dist/codemirror.min.css \
   dist/ninja.css \
-  -o dist/ninja.bundle.min.css \
-  --s0 \
-  --debug
+  -o dist/ninja.bundle.min.css

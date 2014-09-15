@@ -26,7 +26,8 @@
     "tests",
     "screenshot.png",
     "editor-ninja.jpg",
-    "thumb"
+    "thumb",
+    "dist/codemirror.min.css"
   ],
   "dependencies": {
     "codemirror": "4.5.0",
