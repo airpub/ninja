@@ -4,9 +4,13 @@
   "description": "the missing front-end markdown editor for Airpub and everyone else",
   "main": "dist.ninja.min.js",
   "scripts": {
-    "build": "bin/build.sh",
-    "build-less": "node_modules/.bin/lessc -x src/less/ninja.less dist/ninja.min.css",
+    "build-js": "bin/build.sh",
+    "build-css-core": "bin/build-css.sh",
+    "build-css-bundle": "bin/build-css-bundle.sh",
+    "build-css": "npm run build-css-core && npm run build-css-bundle",
+    "build-less": "node_modules/.bin/lessc -x src/less/ninja.less dist/ninja.css",
     "watch-less": "node_modules/.bin/rewatch src/**/*.less -c 'npm run build-less'",
+    "build": "npm run build-js && npm run build-css",
     "serve": "node_modules/.bin/serve --no-less .",
     "dev": "npm run serve & npm run watch-less"
   },
@@ -32,8 +36,9 @@
   "homepage": "https://github.com/airpub/ninja",
   "devDependencies": {
     "serve": "~1.4.0",
+    "less": "~1.7.3",
     "uglify-js": "^2.4.15",
     "rewatch": "~0.2.2",
-    "less": "~1.7.3"
+    "clean-css": "~2.2.13"
   }
 }

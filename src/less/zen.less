@@ -1,3 +1,12 @@
+.fullscreen() {
+  width: 100%;
+  height: 100%;
+  padding-left: 50px !important;
+  padding-bottom: 50px !important;
+  padding-right: 50px !important;
+  background-color: #f9f9f5;
+}
+
 /* CodeMirror Style */
 .CodeMirror {
   height: 600px;
@@ -106,4 +115,12 @@
       color: #dd1144;
     }
   }
+}
+
+:-webkit-full-screen {
+  .fullscreen();
+}
+
+:-moz-full-screen {
+  .fullscreen();
 }

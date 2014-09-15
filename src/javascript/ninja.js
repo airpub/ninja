@@ -253,6 +253,7 @@
   Ninja.prototype.createStatusbar = createStatusbar;
 
   function createStatusbar(status) {
+    return; // disable for tmp
     status = status || this.statusbar;
 
     if (!status || status.length === 0) return;
