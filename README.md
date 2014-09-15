@@ -1,8 +1,6 @@
 ![editor-ninja](./editor-ninja.jpg)
 
----
-
-![release](http://img.shields.io/github/release/airpub/ninja.svg?style=flat)&nbsp;![npm](http://img.shields.io/npm/v/editor-ninja.svg?style=flat)
+![npm](http://img.shields.io/npm/v/editor-ninja.svg?style=flat)
 
 a hackable Markdown editor based on [CodeMirror](http://codemirror.net/). 
 inspired by lepture's [editor](https://github.com/lepture/editor). 
