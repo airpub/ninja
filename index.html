@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Editor Ninja</title>
+  <link rel="stylesheet" href="bower_components/ninja/dist/ninja.min.css">
+  <script src="bower_components/ninja/dist/ninja.min.js"></script>
 </head>
 <body>
-  <h1>Editor Ninja</h1>
+  <div class="wrap">
+    <h1>Editor Ninja</h1>
+    <textarea name="editor" id="editor" cols="30" rows="10"></textarea>
+  </div>
+  <script>
+    new EditorNinja(document.getElementById('editor'));
+  </script>
 </body>
 </html>

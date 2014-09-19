@@ -1,0 +1,12 @@
+{
+  "name": "editor.ninja",
+  "version": "1.0.0",
+  "private" : true,
+  "scripts": {
+    "serve": "serve --no-less .",
+    "start": "npm run serve"
+  },
+  "devDependencies": {
+    "serve": "~1.4.0"
+  }
+}
