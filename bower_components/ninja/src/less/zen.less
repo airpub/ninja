@@ -1,0 +1,126 @@
+.fullscreen() {
+  width: 100%;
+  height: 100%;
+  padding-left: 50px !important;
+  padding-bottom: 50px !important;
+  padding-right: 50px !important;
+  background-color: #f9f9f5;
+}
+
+/* CodeMirror Style */
+.CodeMirror {
+  height: 600px;
+  min-height: 600px;
+  font: 16px/1.5 "Helvetica Neue", "Helvetica", "Xin Gothic", "Hiragino Sans GB", "WenQuanYi Micro Hei", "Microsoft YaHei", sans-serif;
+  background-color: transparent;
+}
+
+.CodeMirror-focused .CodeMirror-selected { 
+  background: #d9d9d9; 
+}
+
+/* Theme: Zen */
+.cm-s-zen {
+  .cm-keyword {
+    color: #333;
+  }
+  .cm-atom {
+    color: #7f8c8d;
+  }
+  .cm-number {
+    color: #099;
+  }
+  .cm-variable,
+  .cm-punctuation,
+  .cm-property {
+    color: #008080;
+  }
+  .cm-def,
+  .cm-variable-2,
+  .cm-operator {
+    color: #900;
+  }
+  .cm-variable-3 {
+    color: #085;
+  }
+  .cm-comment {
+    color: #a50;
+  }
+  .cm-string {
+    color: #7f8c8d;
+  }
+  .cm-string-2 {
+    color: #f50;
+  }
+  .cm-meta {
+    color: #555;
+  }
+  .cm-qualifier {
+    color: #008080;
+  }
+  .cm-error {
+    color: #f00;
+  }
+  .cm-builtin {
+    color: #555;
+  }
+  .cm-bracket {
+    color: #997;
+  }
+  .cm-tag {
+    color: #000080;
+  }
+  .cm-attribute {
+    color: #008080;
+  }
+  .cm-header {
+    color: #444;
+  }
+  .cm-header-2 {
+    color: #444;
+  }
+  .cm-quote {
+    color: #888;
+  }
+  .cm-hr {
+    color: #999;
+  }
+  .cm-link {
+    color: #7f8c8d;
+  }
+  .cm-strong {
+    padding-left: 0px;
+    margin-left: 0px;
+  }
+  .cm-attribute,
+  .cm-bracket,
+  .cm-keyword, 
+  .cm-variable, 
+  .cm-number, 
+  .cm-operator, 
+  .cm-variable, 
+  .cm-comment,
+  .cm-qualifier,
+  .cm-property,
+  .cm-meta,
+  .cm-atom {
+    font-size: 14px;
+    font-family: monospace;
+  }
+  .ff-monospace {
+    font-size: 14px;
+    font-family: monospace !important;
+    .cm-string {
+      font-size: 14px !important;
+      color: #dd1144;
+    }
+  }
+}
+
+:-webkit-full-screen {
+  .fullscreen();
+}
+
+:-moz-full-screen {
+  .fullscreen();
+}

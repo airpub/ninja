@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Try Editor Ninja</title>
+  <!-- styles -->
+  <link rel="stylesheet" href="../bower_components/fontawesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="../dist/ninja.min.css">
+  <!-- angular.js -->
+  <script src="../bower_components/angular/angular.min.js"></script>
+  <!-- codemirror -->
+  <script src="../bower_components/codemirror/lib/codemirror.js"></script>
+  <script src="../bower_components/codemirror/mode/markdown/markdown.js"></script>
+  <script src="../bower_components/codemirror/mode/xml/xml.js"></script>
+  <script src="../bower_components/codemirror/mode/css/css.js"></script>
+  <script src="../bower_components/codemirror/mode/javascript/javascript.js"></script>
+  <script src="../bower_components/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="../bower_components/codemirror/addon/edit/continuelist.js"></script>
+  <script src="../bower_components/codemirror/addon/edit/closebrackets.js"></script>
+  <script src="../src/ninja.js"></script>
+  <!-- editor ninja -->
+  <script src="../src/javascript/ninja.js"></script>
+  <!-- ninja shuriken (addons) -->
+  <script src="../bower_components/js-base64/base64.min.js"></script>
+  <script src="../bower_components/js-md5/js/md5.min.js"></script>
+  <script src="../bower_components/upyun/dist/upyun.min.js"></script>
+  <script src="../shuriken/upload.js"></script>
+</head>
+<body>
+  <textarea name="editor" id="editor" cols="30" rows="10">123</textarea>
+  <script>
+    (function(){
+      window.editor = new ninja();
+      
+      editor
+        .tool('custom', toolAction)
+        .tool('mysite', 'http://airpub.io')
+        .tool('|')
+        .tool('inject', injectText)
+        .tool('inject-custom-html', '<span class="haha">customHtml<i class="fa fa-home"></i></span>', bindclick)
+        .render();
+
+      function toolAction(editor) {
+        alert('just clicked!');
+      }
+
+      function injectText(editor) {
+        return editor.inject('you have been hacked!');
+      }
+
+      function bindclick(editor, el) {
+        return editor.inject(el.innerHtml);
+      }
+    })();
+  </script>
+</body>
+</html>
