@@ -1,0 +1,42 @@
+*, body {
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  margin-bottom: 100px;
+}
+
+.editor-ninja {
+  width: 787px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.editor-toolbar {
+  border: 1px solid #ddd;
+}
+
+.logo {
+  margin: 50px 0;
+}
+
+.logo h1 {
+  display: block;
+  text-indent: -9999em;
+  width: 787px;
+  height: 113px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.logo h1 {
+  width: 787px;
+  height: 113px;
+  display: block;
+  background: url(./images/editor-ninja.jpg) no-repeat center;
+}
+
+.editor {
+  background-color: #f5f5f5;
+}
