@@ -1,6 +1,6 @@
 {
   "name": "ninja",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/airpub/ninja",
   "authors": [
     "Guo Yu <o.u.turing@gmail.com>"
@@ -39,14 +39,14 @@
     "js-base64": "~2.1.5",
     "js-md5": "~1.1.0"
   },
-  "_release": "0.1.0",
+  "_release": "0.1.1",
   "_resolution": {
     "type": "version",
-    "tag": "v0.1.0",
-    "commit": "595954acfe90c0411d134c42d21fa5dd2dc1f067"
+    "tag": "v0.1.1",
+    "commit": "12dcfe10dbe5d4ff95809cde44b676aa3c457c0a"
   },
   "_source": "https://github.com/airpub/ninja.git",
-  "_target": "~0.1.0",
+  "_target": "~0.1.1",
   "_originalSource": "ninja",
   "_direct": true
 }
