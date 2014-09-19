@@ -8,3 +8,4 @@ bower_*
 dist/codemirror.*
 screenshot.png
 editor-ninja.jpg
+dist/font.css

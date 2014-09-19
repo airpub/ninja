@@ -6,3 +6,4 @@ thumb
 *.log
 bower_*
 dist/codemirror.*
+dist/font.css
