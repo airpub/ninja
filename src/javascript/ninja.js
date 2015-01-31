@@ -684,6 +684,7 @@
   function inject(cm, texts, triggered) {
     if (!cm) return;
 
+    texts = Array.prototype.slice.call(texts);
     var startPoint = cm.getCursor('start');
     var endPoint = cm.getCursor('end');
     var text = cm.getSelection();
